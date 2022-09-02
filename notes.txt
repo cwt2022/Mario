@@ -1,0 +1,71 @@
+main.py游戏主入口
+
+source
+    components成分,部件
+        -box.py 盒子(游戏中带问号的方格)
+        -brick.py 砖块
+        -coin.py 金币
+        -enemy.py 敌人
+        -player.py 主角
+        -powerup.py 强化（游戏中蘑菇）
+        -stuff.py 物品（不起眼的小道具，旗子水管等）
+        -info.py 游戏信息（显示在屏幕上方的英文字体等）
+            def __init__(self,state):
+                self.state = state
+                self.create_state_lable()  #创某阶段特有的文字
+                self.create_info_labels()    #创建各阶段通用性息
+                self.flash_coin = coin.FlashingCoin() #初始化金币类
+             def create_state_lable(self):  #创造某阶段特有的文字
+             def create_info_labels(self):  #创建各阶段通用性息
+             def create_lable(self,label,size=40,width_scale=1.25,height_csale=1): #文字生成图片
+             def update(self):  #调用金币类更新类更新方法,实现金币闪烁
+             def draw(self,surface):    #把静态文字，动态金币等信息画上去
+    states状态
+        -main_menu.py 主页面（游戏刚进入的主菜单）
+            -MainMenu()类
+                def __init__(self):
+                      self.setup_background()   #设置背景底图
+                      self.setup_cursor()       #设置光标
+                      self.setup_palyer()        #设置游戏角色
+                      self.info=info.Info('main_menu')   #设置文字信息
+                      self.finished=False     #主页面是否结束（状态机）
+                      self.next = 'load_screen' #下一个状态
+                def setup_background(self): #设置背景底图
+                def setup_palyer(self): #设置角色
+                def setup_cursor(self):  #设置光标
+                def update_cursor(self,keys):  #更新光标
+                def update(self,surface,keys):  #更新画面
+        -load_screen.py 载入页面
+        -level.py 游戏关卡
+    constants.py 存储游戏常量
+    sound.py 音效/音乐
+    set_up.py 启动代码（如设置屏幕宽高，载入素材等）
+    tools.py 主控，工具代码 （好用的工具，如图片加载工具）
+         -Game()类，游戏主控. Game().run运行游戏. Game().update更新游戏
+         -load_graphics(path:图片路径)函数：加载图片 return:graphics{name:img}   本项目加载的是一张大图，大图上有很多小图
+            -pygame.image.load("图片路径").convert()
+         -get_image(sheet:传入加载后的图片,x:图片在大图的x坐标,y：图片在大图的y坐标,width：图片宽,height：图片高,colorkey：改颜色设置为透明,scale：放大倍速)
+
+难点：
+
+    Mario的位置：由其速度决定，由速度计算出位置
+    画面跟随:简单解决方法，1.锁定主角移动背景（略显沉闷）
+                        2.主角动，背景也动
+                          -新建一个新图层
+                          -把游戏里的事件正常画在该图层
+                          -把游戏窗口显示的画面渲染到屏幕上
+    碰撞检测：
+        常规做法：
+            -要把所有可能与Mario发生碰撞的物体一一罗列出来，依次做碰撞检测
+            -python中，可用精灵组加碰撞检测api实现
+        柱子水管等：
+            - 从json文件中读出坐标，逐个个实例化
+            - 创建了一个精灵组，把所有相同类型的放入同一组
+            - 然后在Mario位置更新函数中进行配置
+
+    信息传递：
+
+    宝箱顶起4过程：1正常状态，2被顶了下，3微微隆起，4打开破碎
+
+    检查点技术：实际就是一个无形的矩形(为了解决Mario不论速度快慢都能见到对应阶段的野怪)
+    bug:mario从右边碰到物体会身体会嵌入一些

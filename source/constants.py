@@ -1,0 +1,18 @@
+#编写者：cwt
+#时间：2022/7/4 21:24
+#常量
+
+SCREEN_W,SCREEN_H=800,600
+SCREEN_SIZE=(SCREEN_W,SCREEN_H)
+GROUND_HEIGHT=SCREEN_H-62 #地板高度
+
+ENEMY_MULTI = 2.5
+BG_MULTI = 2.68
+PLAYER_MULTI = 2.9
+BRICK_MULTI = 2.69 #砖块放大倍数
+ENEMY_SPEED = 1
+
+GRAVITY = 1.0 #重力加速度
+ANYI_GRAVITY = 0.3 #上升加速度，Mario可以反重力能力
+
+FONT='FixedSys.ttf'
