@@ -156,7 +156,7 @@ class Level:
             self.dying_group.update(self)
             self.shell_group.update(self)
             self.coin_group.update()
-            self.powerup_group.update()
+            self.powerup_group.update(self)
 
             # for enemy_group in self.enemy_group_dict.values():
             #     enemy_group.update(self) #直接把level这个实例传过去了
@@ -214,6 +214,12 @@ class Level:
                     shell.rect.x -=40
                     shell.direction=0
                 shell.state = 'slide'
+        powerup=pygame.sprite.spritecollideany(self.player,self.powerup_group)
+        if powerup:
+            powerup.kill()
+            # if powerup.name=='mushroom':
+            #     self.player.state = 'small2big'
+
 
     def check_y_collisions(self):
         # check_group = pygame.sprite.Group( self.ground_items_group,self.brick_group,self.box_group)
@@ -291,6 +297,7 @@ class Level:
         if not collided and sprite.state !='jump':
             sprite.state='fall'
         sprite.rect.y-=1
+        #print('掉落检测')
     def update_game_window(self):
 
         third=self.game_window.x+self.game_window.width/3 #先计算出窗口的三分之一
@@ -302,6 +309,9 @@ class Level:
     def draw(self,surface):
         self.game_ground.blit(self.background,(self.game_window.x,self.game_window.y),self.game_window)
         self.game_ground.blit(self.player.image, self.player.rect)
+
+        self.powerup_group.draw(self.game_ground)
+
         self.brick_group.draw(self.game_ground)  #画出精灵组内容
         self.box_group.draw(self.game_ground)  # 画出精灵组内容
         #self.enemy_group.draw((self.game_ground))
@@ -311,7 +321,7 @@ class Level:
         self.shell_group.draw(self.game_ground)
 
         self.coin_group.draw(self.game_ground)
-        self.powerup_group.draw(self.game_ground)
+
         # for enemy_group in self.enemy_group_dict.values():
         #     enemy_group.draw(self.game_ground)
 
