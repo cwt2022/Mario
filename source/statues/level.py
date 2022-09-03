@@ -60,22 +60,31 @@ class Level:
     def setup_brick_and_box(self):
         self.brick_group = pygame.sprite.Group()
         self.box_group= pygame.sprite.Group()
+        self.coin_group=pygame.sprite.Group() #存放开箱出来的金币
+        self.powerup_group = pygame.sprite.Group() #存放开箱的道具
         if 'brick' in self.map_data:
             for brick_data in self.map_data['brick']:
                 x,y=brick_data['x'],brick_data['y']
                 brick_type = brick_data['type']
-                if 'brick_num' in brick_data:
-                    # TODO batch bricks
-                    pass
+                if brick_type == 0:
+                    if 'brick_num' in brick_data:
+                        # TODO batch bricks
+                        pass
+                    else:
+                        self.brick_group.add(brick.Brick(x,y,brick_type,None))
+                        #print('test',brick.Brick(x,y,brick_type))
+                elif brick_type == 1:
+                    self.brick_group.add(brick.Brick(x,y,brick_type,self.coin_group))
                 else:
-                    self.brick_group.add(brick.Brick(x,y,brick_type))
-                    #print('test',brick.Brick(x,y,brick_type))
-
+                    self.brick_group.add(brick.Brick(x,y,brick_type,self.powerup_group))
         if 'box' in self.map_data:
             for box_data in self.map_data['box']:
                 x, y = box_data['x'], box_data['y']
                 box_data = box_data['type']
-                self.box_group.add(box.Box(x, y, box_data))
+                if box_data == 1:
+                    self.box_group.add(box.Box(x, y, box_data,self.coin_group))
+                else:
+                    self.box_group.add(box.Box(x, y, box_data,self.powerup_group))
 
     '''myself'''
     # def setup_enemy(self):
@@ -129,6 +138,8 @@ class Level:
         self.current_time = pygame.time.get_ticks()
         self.player.update(keys)
 
+
+
         if self.player.dead:
             if self.current_time - self.player.death_timer >3000:
                 self.finished =True
@@ -141,9 +152,12 @@ class Level:
             self.update_game_window()
             self.brick_group.update() #刷新精灵图，使其相应效果生效
             self.box_group.update()
-            self.enemy_group.update(self)
+            self.enemy_group.update(self) #需要传入level对象
             self.dying_group.update(self)
             self.shell_group.update(self)
+            self.coin_group.update()
+            self.powerup_group.update()
+
             # for enemy_group in self.enemy_group_dict.values():
             #     enemy_group.update(self) #直接把level这个实例传过去了
             #self.enemy_group.update()
@@ -202,15 +216,29 @@ class Level:
                 shell.state = 'slide'
 
     def check_y_collisions(self):
-        check_group = pygame.sprite.Group(self.ground_items_group, self.brick_group,self.box_group)
-        ground_item = pygame.sprite.spritecollideany(self.player, check_group)
-
+        # check_group = pygame.sprite.Group( self.ground_items_group,self.brick_group,self.box_group)
+        ground_item=pygame.sprite.spritecollideany(self.player,self.ground_items_group)
+        brick=pygame.sprite.spritecollideany(self.player,self.brick_group)
+        box =pygame.sprite.spritecollideany(self.player,self.box_group)
+        enemy = pygame.sprite.spritecollideany(self.player, self.enemy_group)
+        # ground_item = pygame.sprite.spritecollideany(self.player, self.brick_group)
+        #
+        # if ground_item:
+        #     self.adjust_player_y(ground_item)
+        if brick and box:
+            to_brick =abs(self.player.rect.centerx - brick.rect.centerx)
+            to_box=abs(self.player.rect.centerx - box.rect.centerx)
+            if to_brick>to_box:
+                brick=None
+            else:
+                box=None
         if ground_item:
             self.adjust_player_y(ground_item)
-
-
-        enemy =pygame.sprite.spritecollideany(self.player,self.enemy_group)
-        if enemy:
+        elif brick:
+            self.adjust_player_y(brick)
+        elif box:
+            self.adjust_player_y(box)
+        elif enemy:
 
             self.enemy_group.remove(enemy)#移出野怪组
             if enemy.name == 'koopa':
@@ -236,6 +264,7 @@ class Level:
             self.player.rect.left = sprite.rect.right
         self.player.x_vel=0
     def adjust_player_y(self,sprite):
+
         if self.player.rect.bottom<sprite.rect.bottom:  #从上往下撞击
             self.player.y_vel =0
             self.player.rect.bottom =sprite.rect.top
@@ -244,6 +273,16 @@ class Level:
             self.player.y_vel=7
             self.player.rect.top=sprite.rect.bottom
             self.player.state='fall'
+
+            if sprite.name=='box':
+                if sprite.state == 'rest':
+                    sprite.go_bumped()
+            if sprite.name == 'brick':
+                if sprite.state == 'rest':
+                    sprite.go_bumped()
+
+
+
     def check_will_fail(self,sprite):#坠落检测
         '''让该精灵下坠1px,没有发生碰撞则为设置为下坠状态'''
         sprite.rect.y+=1
@@ -270,6 +309,9 @@ class Level:
         self.enemy_group.draw(self.game_ground)
         self.dying_group.draw(self.game_ground)
         self.shell_group.draw(self.game_ground)
+
+        self.coin_group.draw(self.game_ground)
+        self.powerup_group.draw(self.game_ground)
         # for enemy_group in self.enemy_group_dict.values():
         #     enemy_group.draw(self.game_ground)
 
@@ -280,6 +322,7 @@ class Level:
         # surface.blit(self.player.image, self.player.rect)
         self.info.update()  # 调用信息更新方法，调用金币类更新类更新方法,实现金币闪烁
         self.info.draw(surface)
+
 
     def check_checkpoints(self):
         checkpoint = pygame.sprite.spritecollideany(self.player,self.checkpoint_group)
