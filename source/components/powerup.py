@@ -4,17 +4,20 @@
 import pygame
 from source import setup,tools,constants
 
-def create_powerup(centerx,centery,type):
+def create_powerup(centerx,centery,type,flag):
     """create powerup based on type and mario state"""
-    return Mushroom(centerx,centery)
+    if flag:
+        return Mushroom(centerx,centery)
+    else:
+        return Fireflower(centerx, centery)
 
 class Powerup(pygame.sprite.Sprite):
     def __init__(self,centerx,centery,frame_rects):
         pygame.sprite.Sprite.__init__(self)
         self.frames=[]
         self.frames_index=0
-        for frame_rects in frame_rects:
-            self.frames.append(tools.get_image(setup.GRAPHICS['item_objects'],*frame_rects,(0,0,0),2.5))
+        for frame_rect in frame_rects:
+            self.frames.append(tools.get_image(setup.GRAPHICS['item_objects'],*frame_rect,(0,0,0),2.5))
         self.image=self.frames[self.frames_index]
         self.rect=self.image.get_rect()
         self.rect.centerx=centerx
@@ -86,6 +89,35 @@ class Mushroom(Powerup):
 
         if self.state !='grow':
             self.update_position(level)
+
+class Fireflower(Powerup):
+    def __init__(self,centerx,centery):
+        frame_rects=[(0,32,16,16),(16,32,16,16),(32,32,16,16),(48,32,16,16)]
+        Powerup.__init__(self,centerx,centery,frame_rects)
+        self.x_vel = 2
+        self.state = 'grow'
+        self.name='mushroom'
+        self.timer = 0
+
+    def update(self,level):#目的是在自己的更新方法中完成对物体的碰撞检测
+
+        if self.state =='grow':
+            self.rect.y += self.y_vel
+            if self.rect.bottom < self.origin_y:
+
+                self.state='rest'
+
+
+        self.current_time =pygame.time.get_ticks()
+
+        if self.timer == 0:
+            self.timer =self.current_time
+        if self.current_time -self.timer>30:
+            self.frames_index +=1
+            self.frames_index %=len(self.frames)
+            self.timer =self.current_time
+            self.image =self.frames[self.frames_index]
+
 
 
 class Fireball(Powerup):

@@ -152,8 +152,8 @@ class Level:
             self.check_checkpoints()
             self.check_if_go_die()
             self.update_game_window()
-            self.brick_group.update() #刷新精灵图，使其相应效果生效
-            self.box_group.update()
+            self.brick_group.update(self) #刷新精灵图，使其相应效果生效
+            self.box_group.update(self)
             self.enemy_group.update(self) #需要传入level对象
             self.dying_group.update(self)
             self.shell_group.update(self)
@@ -277,7 +277,7 @@ class Level:
                 self.player.state == 'jump'
                 self.player.rect.bottom =enemy.rect.top
                 self.player.y_vel =self.player.jump_velocity *0.8
-            enemy.go_die(how)
+            enemy.go_die(how,1 if self.player.face_rigth else -1)
             #print(self.dying_group)
 
         self.check_will_fail(self.player)
@@ -288,24 +288,40 @@ class Level:
             self.player.rect.left = sprite.rect.right
         self.player.x_vel=0
     def adjust_player_y(self,sprite):
-
+        # downwards
         if self.player.rect.bottom<sprite.rect.bottom:  #从上往下撞击
             self.player.y_vel =0
             self.player.rect.bottom =sprite.rect.top
             self.player.state='walk'
+        #upwards
         else:
             self.player.y_vel=7
             self.player.rect.top=sprite.rect.bottom
             self.player.state='fall'
 
+            #判断上方是否有敌人
+            self.is_enemy_on(sprite)
+
             if sprite.name=='box':
                 if sprite.state == 'rest':
                     sprite.go_bumped()
             if sprite.name == 'brick':
+                if self.player.big and sprite.brick_type == 0:  #when mario is big and brick contains nothing
+                    sprite.smashed(self.dying_group)
                 if sprite.state == 'rest':
                     sprite.go_bumped()
 
-
+    def is_enemy_on(self,sprite):
+        sprite.rect.y -=1 #向上试探一下
+        enemy = pygame.sprite.spritecollideany(sprite,self.enemy_group)
+        if enemy:
+            self.enemy_group.remove(enemy)
+            self.dying_group.add(enemy)
+            if sprite.rect.centerx > enemy.rect.centerx: #如果mario在敌人右边，敌人往左飞
+                enemy.go_die('bumped',-1)
+            else:
+                enemy.go_die('bumped', 1)
+        sprite.rect.y +=1
 
     def check_will_fail(self,sprite):#坠落检测
         '''让该精灵下坠1px,没有发生碰撞则为设置为下坠状态'''

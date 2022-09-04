@@ -166,7 +166,7 @@ class Enemy(pygame.sprite.Sprite):
         if self.state =='slide':
             enemy =pygame.sprite.spritecollideany(self,level.enemy_group)
             if enemy:
-                enemy.go_die(how='slided')
+                enemy.go_die(how='slided',direction=self.direction)
                 level.enemy_group.remove(enemy)
                 level.dying_group.add(enemy)
 
@@ -183,10 +183,11 @@ class Enemy(pygame.sprite.Sprite):
                 self.state='walk'
         level.check_will_fail(self)
 
-    def go_die(self,how):
+    def go_die(self,how,direction=1):
         #self.kill()
         self.death_time = self.current_time
         if how in ['bumped','slided']: #各种死因
+            self.x_vel =constants.ENEMY_SPEED * direction
             self.y_vel=-8
             self.gravity=0.5
             self.state='die'

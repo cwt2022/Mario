@@ -36,16 +36,16 @@ class Brick(pygame.sprite.Sprite):
         self.state = 'rest'
         self.timer = 0
 
-    def update(self):
+    def update(self,level):
         self.current_time = pygame.time.get_ticks()
-        self.handle_states()
+        self.handle_states(level)
 
-    def handle_states(self):
+    def handle_states(self,level):
         if self.state == 'rest':
             # print('rest')
             self.rest()
         elif self.state == 'bumped':
-            self.bumped()
+            self.bumped(level)
         elif self.state == 'open':
             self.open()
 
@@ -56,7 +56,7 @@ class Brick(pygame.sprite.Sprite):
         self.y_vel = -7
         self.state = 'bumped'
 
-    def bumped(self):
+    def bumped(self,level):
         self.rect.y += self.y_vel
         self.y_vel += self.gravity
 
@@ -70,7 +70,42 @@ class Brick(pygame.sprite.Sprite):
             elif self.brick_type==1:
                 self.state='open'
             else:
-                self.group.add(create_powerup(self.rect.centerx,self.rect.centery,self.brick_type))
+                if level.player.big:
+                    self.group.add(create_powerup(self.rect.centerx, self.rect.centery, self.brick_type, 0))
+                else:
+                    self.group.add(create_powerup(self.rect.centerx, self.rect.centery, self.brick_type, 1))
+                self.state='open'
+                #print(self.state)
     def open(self):
         self.frames_index=1
         self.image=self.frames[self.frames_index]
+    def smashed(self,group):
+        #砖块一分为四，x,y,x_vel,y_vel
+        debris=[
+            (self.rect.x,self.rect.y,-2,-10),
+            (self.rect.x, self.rect.y, 2, -10),
+            (self.rect.x, self.rect.y, -2, -5),
+            (self.rect.x, self.rect.y, 2, -5),
+        ]
+
+        for d in debris:
+            group.add(Debris(*d))
+        self.kill()
+
+class Debris(pygame.sprite.Sprite):
+    def __init__(self,x,y,x_vel,y_vel):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = tools.get_image(setup.GRAPHICS['tile_set'],68,20,8,8,(0,0,0),constants.BRICK_MULTI)
+        self.rect = self.image.get_rect()
+        self.rect.x=x
+        self.rect.y=y
+        self.x_vel=x_vel
+        self.y_vel=y_vel
+        self.gravity=constants.GRAVITY
+
+    def update(self,*args):
+        self.rect.x +=self.x_vel
+        self.rect.y +=self.y_vel
+        self.y_vel +=self.gravity
+        if self.rect.y > constants.SCREEN_H:
+            self.kill()

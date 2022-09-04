@@ -36,16 +36,16 @@ class Box(pygame.sprite.Sprite):
         self.timer = 0
 
 
-    def update(self):
+    def update(self,level):
         self.current_time = pygame.time.get_ticks()
-        self.handle_states()
+        self.handle_states(level)
 
-    def handle_states(self):
+    def handle_states(self,level):
         if self.state =='rest':
            # print('rest')
             self.rest()
         elif self.state == 'bumped':
-            self.bumped()
+            self.bumped(level)
         elif self.state =='open':
             self.open()
 
@@ -61,7 +61,7 @@ class Box(pygame.sprite.Sprite):
     def go_bumped(self):
         self.y_vel=-7
         self.state='bumped'
-    def bumped(self):
+    def bumped(self,level):
         self.rect.y +=self.y_vel
         self.y_vel +=self.gravity
         self.frames_index=1
@@ -75,7 +75,10 @@ class Box(pygame.sprite.Sprite):
             if self.box_type == 1:
                 pass
             else:
-                self.group.add(create_powerup(self.rect.centerx,self.rect.centery,self.box_type))
+                if level.player.big:
+                    self.group.add(create_powerup(self.rect.centerx,self.rect.centery,self.box_type,0))
+                else:
+                    self.group.add(create_powerup(self.rect.centerx,self.rect.centery,self.box_type,1))
                 print(self.group)
 
     def open(self):
