@@ -34,6 +34,8 @@ class Player(pygame.sprite.Sprite):
         self.dead = False
         self.big =False
         self.can_jump=True #目的让其松开跳跃按键，才能再次跳跃
+        self.hurt_imune =False
+
     def setup_velocities(self):  #设置速率
         print('111')
         speed=self.palyer_data["speed"]  #????????????????????
@@ -61,6 +63,7 @@ class Player(pygame.sprite.Sprite):
         self.transtion_timer = 0
         self.last_time = 0
         self.death_timer = 0
+        self.hurt_imune_timer=0 #记录伤害免疫的时间
 
     def load_images(self):   #载入主角的各种帧造型
         sheet =setup.GRAPHICS['mario_bros']
@@ -132,6 +135,7 @@ class Player(pygame.sprite.Sprite):
     def update(self,keys):
         self.current_time = pygame.time.get_ticks()  #以毫秒为单位获取时间
         self.handle_states(keys) #处理各种状态
+        self.is_hurt_immune()
         # if keys[pygame.K_RIGHT]:
         #     self.x_vel = 5
         #     self.y_vel = 0
@@ -174,6 +178,11 @@ class Player(pygame.sprite.Sprite):
             self.fall(keys)
         elif self.state == 'die':
             self.die(keys)
+        elif self.state == 'small2big':
+            self.small2big(keys)
+        elif self.state == 'big2small':
+            self.big2small(keys)
+
 
         if self.face_rigth:
             self.image =self.right_frames[self.frame_index]
@@ -214,7 +223,7 @@ class Player(pygame.sprite.Sprite):
 
         shijiancha=self.current_time-self.last_time
         self.last_time=self.current_time
-        print('时间差：',shijiancha)   #一直按着按键的时间差，33-34毫秒
+       # print('时间差：',shijiancha)   #一直按着按键的时间差，33-34毫秒
         if self.current_time - self.walking_timer > self.calc_frame_duration():        #当时间差大于100是，切换Mario帧，速度越快摆臂也要越快.calc_frame_duration帧持久
             if self.frame_index < 3:
                 self.frame_index+=1
@@ -226,9 +235,9 @@ class Player(pygame.sprite.Sprite):
             if self.x_vel <0:
                 self.frame_index =5
                 self.x_accel =self.turn_accel
-            print(self.x_vel)
+            #print(self.x_vel)
             self.x_vel=self.calc_vel(self.x_vel,self.x_accel,self.max_x_vel,True)
-            print(self.x_vel,self.x_accel,self.max_x_vel)
+           # print(self.x_vel,self.x_accel,self.max_x_vel)
         elif keys[pygame.K_LEFT]:
             self.face_rigth = False
             if self.x_vel > 0:
@@ -249,7 +258,7 @@ class Player(pygame.sprite.Sprite):
 
     def jump(self, keys):
         self.frame_index =4 #Mario起跳用的是第四帧
-        print(self.y_vel,self.anti_gravity)
+       # print(self.y_vel,self.anti_gravity)
         self.y_vel+=self.anti_gravity
         self.can_jump=False
         if self.y_vel>=0:  #往上为负方向，往下为正
@@ -291,6 +300,60 @@ class Player(pygame.sprite.Sprite):
         self.state = 'die'
         self.death_timer = self.current_time
 
+    def small2big(self,keys):
+        frame_dur=65
+        sizes = [1,0,1,0,1,2,0,1,2,0,2] #0 small 1 medium 2 big
+        frames_and_idx=[(self.small_normal_frames,0),(self.small_normal_frames,7),(self.big_normal_frames,0)]
+        if self.transtion_timer ==0:
+            self.big=True
+            self.transtion_timer=self.current_time
+            self.changing_index=0
+        elif self.current_time -self.transtion_timer > frame_dur:
+            self.transtion_timer = self.current_time
+            frames,index = frames_and_idx[sizes[self.changing_index]]
+            self.change_player_image(frames,index)
+            self.changing_index+=1
+            if self.changing_index == len(sizes):
+                self.transtion_timer = 0
+                self.state = 'walk'
+                self.right_frames = self.rigth_big_normal_frames
+                self.left_frames = self.left_big_normal_frames
+
+    def big2small(self,keys):
+        frame_dur=65
+        sizes = [2,1,0,1,0,1,0,1,0,1,0] #0 small 1 medium 2 big
+        frames_and_idx=[(self.small_normal_frames,8),(self.big_normal_frames,8),(self.big_normal_frames,4)]#帧库及其对应帧索引
+        if self.transtion_timer ==0:
+            self.big=False
+            self.transtion_timer=self.current_time
+            self.changing_index=0
+        elif self.current_time -self.transtion_timer > frame_dur:
+            self.transtion_timer = self.current_time
+            frames,index = frames_and_idx[sizes[self.changing_index]]
+            self.change_player_image(frames,index)
+            self.changing_index+=1
+            if self.changing_index == len(sizes):
+                self.transtion_timer = 0
+                self.state = 'walk'
+                self.right_frames = self.rigth_small_normal_frames
+                self.left_frames = self.left_small_normal_frames
+
+    def change_player_image(self,frames,index):
+        self.frame_index=index
+        if self.face_rigth:
+            self.right_frames =frames[0]  #获取self.rigth_small_normal_frames,rigth_big_normal_frames
+            self.image=self.right_frames[self.frame_index] #按照传入的参数取出小mario，中Mario，大mario
+        else:
+            self.left_frames=frames[1]
+            self.image =self.left_frames[self.frame_index]
+        last_frame_bottom = self.rect.bottom
+        last_frame_centerx=self.rect.centerx
+        self.rect=self.image.get_rect()
+        self.rect.bottom =last_frame_bottom
+        self.rect.centerx =last_frame_centerx
+        #print(self.rect.bottom)
+
+
     def calc_vel(self,vel,accle,max_vel,is_positive=True):#计算速度
         if is_positive:
             return min(vel +accle,max_vel)
@@ -299,6 +362,21 @@ class Player(pygame.sprite.Sprite):
     def calc_frame_duration(self):
         duration=-60/self.max_run_speed+abs(self.x_vel)+80 # abs() 函数返回数字的绝对值
         return duration
+
+    def is_hurt_immune(self):#判断是否为无敌模式
+        if self.hurt_imune:
+            if self.hurt_imune_timer == 0:
+                self.hurt_imune_timer =self.current_time
+
+                '''无敌时间内添加特效,创建空白帧，在每100毫秒的前50毫秒显示，后50毫秒显示实体'''
+                self.blank_image =pygame.Surface((1,1)) ##??
+            elif self.current_time -self.hurt_imune_timer <2000:
+                if (self.current_time- self.hurt_imune_timer)%100 <50:
+                    self.image=self.blank_image
+            else:
+                self.hurt_imune=False
+                self.hurt_imune_timer=0
+
 if __name__ == '__main__':
     play=Player('mario')
     play.load_data()

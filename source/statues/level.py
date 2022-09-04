@@ -144,6 +144,8 @@ class Level:
             if self.current_time - self.player.death_timer >3000:
                 self.finished =True
                 self.update_game_info() #当Mario阵亡时更新数据
+        elif self.is_frozen(): #变身状态，场景冻结
+            pass
         else:
 
             self.update_player_position()
@@ -162,6 +164,9 @@ class Level:
             #     enemy_group.update(self) #直接把level这个实例传过去了
             #self.enemy_group.update()
         self.draw(surface)
+
+    def is_frozen(self):
+        return self.player.state in ['small2big','big2small','big2fire','fire2small']
 
     def update_player_position(self): #更新人物位置
 
@@ -196,14 +201,26 @@ class Level:
 
         if ground_item:
             self.adjust_player_x(ground_item)
+
+        if self.player.hurt_imune:
+            return
+
         enemy=pygame.sprite.spritecollideany(self.player,self.enemy_group)
         if enemy:
-            self.player.go_die()
+            if self.player.big:
+                self.player.state ='big2small'
+                self.player.hurt_imune =True #伤害免疫
+            else:
+                self.player.go_die()
 
         shell=pygame.sprite.spritecollideany(self.player,self.shell_group)
         if shell:
             if shell.state =='slide': #虽然乌龟变成龟壳加入龟壳组了，但它本质上还是乌龟
-                self.player.go_die()
+                if self.player.big:
+                    self.player.state = 'big2small'
+                    self.player.hurt_imune = True  # 伤害免疫
+                else:
+                    self.player.go_die()
             else:
                 if self.player.rect.x < shell.rect.x:
                     shell.x_vel = 10
@@ -217,8 +234,8 @@ class Level:
         powerup=pygame.sprite.spritecollideany(self.player,self.powerup_group)
         if powerup:
             powerup.kill()
-            # if powerup.name=='mushroom':
-            #     self.player.state = 'small2big'
+            if powerup.name=='mushroom':
+                self.player.state = 'small2big'
 
 
     def check_y_collisions(self):
@@ -244,9 +261,10 @@ class Level:
             self.adjust_player_y(brick)
         elif box:
             self.adjust_player_y(box)
-        elif enemy:
-
-            self.enemy_group.remove(enemy)#移出野怪组
+        elif enemy and not self.is_frozen():
+            if self.player.hurt_imune:
+                return
+            self.enemy_group.remove(enemy)#移出野怪组  ??
             if enemy.name == 'koopa':
                 self.shell_group.add(enemy)
             else:
@@ -260,7 +278,7 @@ class Level:
                 self.player.rect.bottom =enemy.rect.top
                 self.player.y_vel =self.player.jump_velocity *0.8
             enemy.go_die(how)
-            print(self.dying_group)
+            #print(self.dying_group)
 
         self.check_will_fail(self.player)
     def adjust_player_x(self,sprite):
@@ -294,7 +312,7 @@ class Level:
         sprite.rect.y+=1
         check_ground=pygame.sprite.Group(self.ground_items_group,self.brick_group,self.box_group)
         collided=pygame.sprite.spritecollideany(sprite,check_ground)
-        if not collided and sprite.state !='jump':
+        if not collided and sprite.state !='jump' and not self.is_frozen():
             sprite.state='fall'
         sprite.rect.y-=1
         #print('掉落检测')

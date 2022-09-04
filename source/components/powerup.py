@@ -59,7 +59,7 @@ class Powerup(pygame.sprite.Sprite):
                 self.rect.bottom = sprite.rect.top
                 self.y_vel = 0
                 self.state = 'walk'
-        print('下落检测')
+        #print('下落检测')
         level.check_will_fail(self)
 
 
