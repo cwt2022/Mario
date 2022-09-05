@@ -4,7 +4,7 @@
 import json
 import os
 
-from source.components import info,player,stuff,brick,box,enemy
+from source.components import info,player,stuff,brick,box,enemy,plagpole
 from source import tools,setup,constants
 import pygame
 
@@ -14,6 +14,12 @@ class Level:
         self.finished= False
         self.next = 'game_over'
         self.info=info.Info('level',self.game_info)
+
+
+        self.flag=plagpole.Flag(470,116)
+        # self.finial=plagpole.Finial(497,97)
+        #self.pole=plagpole.Pole(200,400)
+        print(self.flag)
         self.load_map_data()
         self.setup_background()
         self.setup_start_posotions()#新建起始位置的方法
@@ -22,6 +28,7 @@ class Level:
         self.setup_brick_and_box()
         self.setup_enemy()
         self.setup_checkpoints()    #初始化检查点
+        self.setup_flag()
 
 
     def load_map_data(self):
@@ -125,6 +132,31 @@ class Level:
                        # print('55555555555555',group)
                     self.enemy_group_dict[enemy_group_id]=group
 
+    def setup_flag(self):
+        self.pole_group=pygame.sprite.Group()
+        self.flag_group=pygame.sprite.Group()
+        self.finial_group=pygame.sprite.Group()
+        '''测试用'''
+        # for item in [{"x":470, "y":116, "type":0},
+        # {"x":505, "y": 97, "type":1},
+        # {"x":505, "y":137, "type":1},
+        # {"x":505, "y":177, "type":1},
+        # {"x":505, "y":217, "type":1},
+        # {"x":505, "y":257, "type":1},
+        # {"x":505, "y":297, "type":1},
+        # {"x":505, "y":337, "type":1},
+        # {"x":505, "y":377, "type":1},
+        # {"x":505, "y":417, "type":1},
+        # {"x":505, "y":450, "type":1},
+        # {"x":497, "y": 97, "type":2}]:
+        for item in self.map_data['flagpole']:
+            x,y,type=item['x'],item['y'],item['type']
+            if type ==0:
+                self.flag_group.add(plagpole.Flag(x,y))
+            elif type==1:
+                self.pole_group.add(plagpole.Pole(x,y))
+            else:
+                self.finial_group.add(plagpole.Finial(x,y))
 
     def setup_checkpoints(self):
         self.checkpoint_group = pygame.sprite.Group()
@@ -136,7 +168,7 @@ class Level:
 
     def update(self,surface,keys):
         self.current_time = pygame.time.get_ticks()
-        self.player.update(keys)
+        self.player.update(keys,self)
 
 
 
@@ -159,6 +191,12 @@ class Level:
             self.shell_group.update(self)
             self.coin_group.update()
             self.powerup_group.update(self)
+            self.pole_group.update()
+            self.flag_group.update()
+            self.finial_group.update()
+
+
+
 
             # for enemy_group in self.enemy_group_dict.values():
             #     enemy_group.update(self) #直接把level这个实例传过去了
@@ -233,9 +271,17 @@ class Level:
                 shell.state = 'slide'
         powerup=pygame.sprite.spritecollideany(self.player,self.powerup_group)
         if powerup:
-            powerup.kill()
-            if powerup.name=='mushroom':
+            if powerup.name=='fireball':
+                print(powerup.rect.x,powerup.rect.y)
+                print('发球')
+
+            elif powerup.name=='mushroom' :
                 self.player.state = 'small2big'
+                powerup.kill()
+            else:
+                self.player.state ='big2fire'
+                powerup.kill()
+
 
 
     def check_y_collisions(self):
@@ -341,6 +387,8 @@ class Level:
 
 
     def draw(self,surface):
+
+
         self.game_ground.blit(self.background,(self.game_window.x,self.game_window.y),self.game_window)
         self.game_ground.blit(self.player.image, self.player.rect)
 
@@ -355,9 +403,13 @@ class Level:
         self.shell_group.draw(self.game_ground)
 
         self.coin_group.draw(self.game_ground)
-
+        self.pole_group.draw(self.game_ground)
+        self.flag_group.draw(self.game_ground)
+        self.finial_group.draw(self.game_ground)
         # for enemy_group in self.enemy_group_dict.values():
         #     enemy_group.draw(self.game_ground)
+        # self.flag.draw(self.game_ground)
+        # self.finial.draw(self.game_ground)
 
 
         surface.blit(self.game_ground, (0, 0),self.game_window)

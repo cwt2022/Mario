@@ -96,7 +96,7 @@ class Fireflower(Powerup):
         Powerup.__init__(self,centerx,centery,frame_rects)
         self.x_vel = 2
         self.state = 'grow'
-        self.name='mushroom'
+        self.name='Fireflower'
         self.timer = 0
 
     def update(self,level):#目的是在自己的更新方法中完成对物体的碰撞检测
@@ -121,7 +121,69 @@ class Fireflower(Powerup):
 
 
 class Fireball(Powerup):
-    pass
+    def __init__(self,centerx,centery,direction):
+        frame_rects=[(96,144,8,8),(104,144,8,7),(96,152,8,8),(104,152,8,8) #旋转
+                    ,(112,144,16,16),(112,160,16,16),(112,176,16,16) ]  #爆炸
+        Powerup.__init__(self,centerx,centery,frame_rects)
+        self.name='fireball'
+        self.state='fly'
+        self.direction=direction
+        self.x_vel =10 if self.direction else -10
+        self.y_vel=10
+        self.gravity=1
+        self.timer=0
+
+    def update(self,level):
+        self.current_time=pygame.time.get_ticks()
+        if self.state == 'fly':
+            self.y_vel +=self.gravity
+            if self.current_time -self.timer >200:
+                self.frames_index +=1
+                self.frames_index %=4
+                self.timer=self.current_time
+                self.image=self.frames[self.frames_index]
+            self.update_position(level)
+        elif self.state == 'boom':
+            if self.current_time -self.timer >50:
+                if self.frames_index<6:
+                    self.frames_index +=1
+                    self.timer =self.current_time
+                    self.image=self.frames[self.frames_index]
+                else:
+                    self.kill()
+
+    def update_position(self, level):
+        self.rect.x += self.x_vel
+        self.check_x_collisions(level)  # x方向碰撞检测
+        self.rect.y += self.y_vel
+        self.check_y_collisions(level)  # y方向碰撞检测
+        if self.rect.x< 0 or self.rect.y>constants.SCREEN_H:
+            self.kill()
+
+    def check_x_collisions(self, level):
+        sprite = pygame.sprite.spritecollideany(self, level.ground_items_group)
+        if sprite:
+            self.frames_index=4
+            self.state='boom'
+        enemy =pygame.sprite.spritecollideany(self,level.enemy_group)
+        if enemy:
+            enemy.kill()
+            self.frames_index = 4
+            self.state = 'boom'
+
+
+
+
+    def check_y_collisions(self, level):
+        # print('yyys')
+        check_group = pygame.sprite.Group(level.ground_items_group, level.brick_group, level.box_group)
+        sprite = pygame.sprite.spritecollideany(self, check_group)
+        if sprite:
+            # print('野怪头部{0}，野怪脚底{2},碰撞物体头部{3}',self.rect.top,self.rect.bottom,sprite.rect.top)
+            if self.rect.top < sprite.rect.top:  # ??从上往下掉落  已解决：坐标轴原因
+                self.rect.bottom = sprite.rect.top
+                self.y_vel = -10
+
 
 
 class LifeMushroom(Powerup):
