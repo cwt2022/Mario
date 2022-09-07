@@ -31,6 +31,7 @@ class Brick(pygame.sprite.Sprite):
         self.rect=self.image.get_rect()
         self.rect.x=self.x
         self.rect.y=self.y
+        print('砖块',self.rect)
         self.gravity=constants.GRAVITY
 
         self.state = 'rest'
@@ -45,6 +46,7 @@ class Brick(pygame.sprite.Sprite):
             # print('rest')
             self.rest()
         elif self.state == 'bumped':
+
             self.bumped(level)
         elif self.state == 'open':
             self.open()
@@ -81,6 +83,7 @@ class Brick(pygame.sprite.Sprite):
         self.image=self.frames[self.frames_index]
     def smashed(self,group):
         #砖块一分为四，x,y,x_vel,y_vel
+
         debris=[
             (self.rect.x,self.rect.y,-2,-10),
             (self.rect.x, self.rect.y, 2, -10),

@@ -15,8 +15,10 @@ class MainMenu():
         game_info={
             'score':0,
             'coin':0,
+            'current_time':0.0,
             'lives':1,
-            'player_state':'small'
+            'player_state':'small',
+            'time':300
         }
         self.start(game_info)
 
@@ -57,8 +59,10 @@ class MainMenu():
             self.cursor.rect.y=405
         elif keys[pygame.K_RETURN]: #按下回车建
             if self.cursor.state=='1P':
+                #setup.SOUND['one_up'].play()
                 self.finished = True
             elif self.cursor.state=='2P':
+                #setup.SOUND['one_up'].play()
                 self.finished = True
 
     def update(self,surface,keys):

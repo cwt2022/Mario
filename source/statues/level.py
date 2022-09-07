@@ -5,11 +5,13 @@ import json
 import os
 
 from source.components import info,player,stuff,brick,box,enemy,plagpole
-from source import tools,setup,constants
+from source import tools,setup,constants,sound
 import pygame
 
 class Level:
     def start(self,game_info):
+
+
         self.game_info=game_info
         self.finished= False
         self.next = 'game_over'
@@ -29,6 +31,9 @@ class Level:
         self.setup_enemy()
         self.setup_checkpoints()    #初始化检查点
         self.setup_flag()
+
+        self.sound=sound.Sound(self)
+        print(self.sound)
 
 
     def load_map_data(self):
@@ -63,6 +68,7 @@ class Level:
         # self.player.rect.y = 490
         self.player.rect.x=self.game_window.x+self.player_x
         self.player.rect.bottom=self.player_y
+
 
     def setup_brick_and_box(self):
         self.brick_group = pygame.sprite.Group()
@@ -170,7 +176,8 @@ class Level:
         self.current_time = pygame.time.get_ticks()
         self.player.update(keys,self)
 
-
+        #setup.SOUND['big_jump'].play()
+        # print( setup.MUSIC)
 
         if self.player.dead:
             if self.current_time - self.player.death_timer >3000:
@@ -195,13 +202,26 @@ class Level:
             self.flag_group.update()
             self.finial_group.update()
 
+            self.is_or_not_finished()
+
+
+
 
 
 
             # for enemy_group in self.enemy_group_dict.values():
             #     enemy_group.update(self) #直接把level这个实例传过去了
             #self.enemy_group.update()
+        self.sound.update(self.game_info,self.player)
+
+        #setup.MUSIC['main_theme'].play()
         self.draw(surface)
+
+    def is_or_not_finished(self):
+
+        if self.player.rect.x > 9000:
+            self.finished=True
+            self.next = 'load_level2'
 
     def is_frozen(self):
         return self.player.state in ['small2big','big2small','big2fire','fire2small']
@@ -272,13 +292,16 @@ class Level:
         powerup=pygame.sprite.spritecollideany(self.player,self.powerup_group)
         if powerup:
             if powerup.name=='fireball':
+                #
                 print(powerup.rect.x,powerup.rect.y)
                 print('发球')
 
             elif powerup.name=='mushroom' :
+                setup.SOUND['pipe'].play()#变身
                 self.player.state = 'small2big'
                 powerup.kill()
             else:
+                setup.SOUND['powerup'].play()
                 self.player.state ='big2fire'
                 powerup.kill()
 
@@ -319,6 +342,7 @@ class Level:
             if self.player.y_vel<0:
                 how = 'bumped'  #bumped凸起的，速度小于0往上的
             else:
+                setup.SOUND['stomp'].play()# 踩死小野怪的声音
                 how = 'trampled' #trampled践踏，从上往下
                 self.player.state == 'jump'
                 self.player.rect.bottom =enemy.rect.top
@@ -351,16 +375,20 @@ class Level:
             if sprite.name=='box':
                 if sprite.state == 'rest':
                     sprite.go_bumped()
+                    setup.SOUND['coin'].play()
             if sprite.name == 'brick':
                 if self.player.big and sprite.brick_type == 0:  #when mario is big and brick contains nothing
+                    setup.SOUND['brick_smash'].play() #大mario撞碎砖块声音
                     sprite.smashed(self.dying_group)
                 if sprite.state == 'rest':
-                    sprite.go_bumped()
+                    sprite.go_bumped()  #小mario撞击砖块声音
+                    setup.SOUND['bump'].play()
 
     def is_enemy_on(self,sprite):
         sprite.rect.y -=1 #向上试探一下
         enemy = pygame.sprite.spritecollideany(sprite,self.enemy_group)
         if enemy:
+            setup.SOUND['kick'].play()#隔空顶死小野怪
             self.enemy_group.remove(enemy)
             self.dying_group.add(enemy)
             if sprite.rect.centerx > enemy.rect.centerx: #如果mario在敌人右边，敌人往左飞

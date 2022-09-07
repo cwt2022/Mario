@@ -6,6 +6,7 @@ import pygame
 import random
 import os
 
+
 class Game():
     def __init__(self,state_dict,start_state):
         # pygame.init()
@@ -29,6 +30,7 @@ class Game():
     def run(self):
 
         while True:
+
             for event in pygame.event.get():  # 循环获取事件，监听事件状态
                 if event.type == pygame.QUIT:   # 判断用户是否点了"X"关闭按钮,并执行if代码段
                     pygame.display.quit()
@@ -60,12 +62,30 @@ def load_graphics(path,accept=('.jpg','.png','.bmp','.gif')):
             graphics[name] = img
     return graphics
 
+def load_all_music(directory, accept=('.wav', '.mp3', '.ogg', '.mdi')):
+    songs = {}
+    for song in os.listdir(directory):
+        name, ext = os.path.splitext(song)
+        if ext.lower() in accept:
+            songs[name] = os.path.join(directory, song)
+    return songs
+
+def load_all_sound(directory, accept=('.wav','.mpe','.ogg','.mdi')):
+
+    effects = {}
+    for fx in os.listdir(directory):
+        name, ext = os.path.splitext(fx)
+        if ext.lower() in accept:
+            effects[name] = pygame.mixer.Sound(os.path.join(directory, fx))
+    return effects
+
 def get_image(sheet,x,y,width,height,colorkey,scale):
     image = pygame.Surface((width,height)) #创建一个和方框一样大的一个图层
     image.blit(sheet,(0,0),(x,y,width,height))#pygame.Surface.blit() 将一个图像（Surface 对象）绘制到另一个图像上  第一个参数为图片，第二个为坐标，第三个为
     image.set_colorkey(colorkey)  #将该颜色设置为透明
     image = pygame.transform.scale(image,(int(width*scale),int(height*scale)))
     return image
+
 
 
 

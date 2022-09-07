@@ -2,7 +2,7 @@
 #时间：2022/7/4 20:39
 #游戏入口
 from source import tools,setup
-from source.statues import main_menu,level,load_screen
+from source.statues import main_menu,level,load_screen,level2
 import pygame
 
 def main():
@@ -10,7 +10,12 @@ def main():
         'main_menu' : main_menu.MainMenu(),
         'load_screen' : load_screen.LoadScreen(),
         'level' : level.Level(),
-        'game_over': load_screen.GameDver()
+        'game_over': load_screen.GameDver(),
+
+
+        '''test'''
+        'level2': level2.Level2(),
+        'load_level2': load_screen.Load_level2()
 
     }
 

@@ -17,6 +17,7 @@ class Player(pygame.sprite.Sprite):
         self.setup_velocities()
         self.setup_timers()
         self.load_images()
+        #print(self.rect)
 
 
     def load_data(self):
@@ -218,9 +219,13 @@ class Player(pygame.sprite.Sprite):
             self.state='jump'
             self.y_vel=self.jump_velocity
 
+            setup.SOUND['small_jump'].play()
+
 
         elif keys[pygame.K_d] and self.fire  and self.can_shoot:
             self.shot_fireball(level)
+
+
 
 
     def walk(self,keys,level):
@@ -239,6 +244,7 @@ class Player(pygame.sprite.Sprite):
         if keys[pygame.K_a] and self.can_jump:
             self.state='jump'
             self.y_vel=self.jump_velocity #给一个初始的跳跃速度
+            setup.SOUND['small_jump'].play()
             if  keys[pygame.K_d] and self.fire and self.can_shoot:
                 self.shot_fireball(level)
 
@@ -369,6 +375,7 @@ class Player(pygame.sprite.Sprite):
                 self.left_frames = self.left_small_normal_frames
 
     def big2fire(self,keys):
+
         frame_dur = 65
         sizes = [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0]  # 0 small 1 medium 2 big
         frames_and_idx = [(self.big_fire_frames, 3), (self.big_normal_frames, 3)]  # 帧库及其对应帧索引
@@ -400,6 +407,7 @@ class Player(pygame.sprite.Sprite):
         self.rect=self.image.get_rect()
         self.rect.bottom =last_frame_bottom
         self.rect.centerx =last_frame_centerx
+        #print(self.rect)
         #print(self.rect.bottom)
 
 
@@ -427,6 +435,7 @@ class Player(pygame.sprite.Sprite):
                 self.hurt_imune_timer=0
 
     def shot_fireball(self,level):
+        setup.SOUND['fireball'].play()
         if self.current_time-self.last_fireball_timer>300:
             self.frame_index =6
             fireball=powerup.Fireball(self.rect.centerx,self.rect.centery,self.face_rigth)

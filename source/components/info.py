@@ -28,6 +28,9 @@ class Info():
             self.play_image = tools.get_image(setup.GRAPHICS['mario_bros'],178,32,12,16,(0,0,0),constants.BG_MULTI)
         elif self.state == 'game_over':
             self.state_labels.append((self.create_lable('GAME OVER'), (280, 300)))
+        elif self.state =='level2':
+            self.state_labels.append((self.create_lable('WELCOME TO LEVEL 2'), (200, 300)))
+
     def create_info_labels(self):  #创建各阶段通用性息
         self.info_labels = []
         self.info_labels.append((self.create_lable('MARIO'), (75, 30)))
@@ -36,6 +39,7 @@ class Info():
         self.info_labels.append((self.create_lable('000000'), (75, 55)))
         self.info_labels.append((self.create_lable('X00'), (300, 55)))
         self.info_labels.append((self.create_lable('1 - 1'), (480, 55)))
+        self.info_labels.append((self.create_lable('{0}'.format(self.game_info['time'])), (635, 55)))
 
     def create_lable(self,label,size=40,width_scale=1.25,height_csale=1): #文字生成图片
         font = pygame.font.SysFont(constants.FONT,size) #调用系统字体
