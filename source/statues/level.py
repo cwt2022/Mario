@@ -9,12 +9,14 @@ from source import tools,setup,constants,sound
 import pygame
 
 class Level:
-    def start(self,game_info):
+    def start(self,game_info,current_time):
 
-
+        self.current_time=current_time
         self.game_info=game_info
+        self.game_info['statue'] = 'level'
         self.finished= False
         self.next = 'game_over'
+
         self.info=info.Info('level',self.game_info)
 
 
@@ -172,10 +174,10 @@ class Level:
             enemy_groupid=item.get('enemy_groupid') #组号并不是每个都有，为了避免报错
             self.checkpoint_group.add(stuff.Checkpoint(x,y,w,h,checkpoint_type,enemy_groupid))
 
-    def update(self,surface,keys):
+    def update(self,surface,keys,current_time):
         self.current_time = pygame.time.get_ticks()
         self.player.update(keys,self)
-
+        self.info.update(self.game_info)
         #setup.SOUND['big_jump'].play()
         # print( setup.MUSIC)
 
@@ -291,16 +293,19 @@ class Level:
                 shell.state = 'slide'
         powerup=pygame.sprite.spritecollideany(self.player,self.powerup_group)
         if powerup:
+
             if powerup.name=='fireball':
                 #
                 print(powerup.rect.x,powerup.rect.y)
                 print('发球')
 
             elif powerup.name=='mushroom' :
+                self.game_info['score'] += 1000
                 setup.SOUND['pipe'].play()#变身
                 self.player.state = 'small2big'
                 powerup.kill()
             else:
+                self.game_info['score'] += 1000
                 setup.SOUND['powerup'].play()
                 self.player.state ='big2fire'
                 powerup.kill()
@@ -334,8 +339,12 @@ class Level:
             if self.player.hurt_imune:
                 return
             self.enemy_group.remove(enemy)#移出野怪组  ??
+            print(self.game_info['score'])
+            self.game_info['score'] +=100
+            print(self.game_info['score'])
             if enemy.name == 'koopa':
                 self.shell_group.add(enemy)
+
             else:
                 self.dying_group.add(enemy)#进入死亡组
 
@@ -376,6 +385,8 @@ class Level:
                 if sprite.state == 'rest':
                     sprite.go_bumped()
                     setup.SOUND['coin'].play()
+                    self.game_info['coin'] +=1
+                    self.game_info['score'] += 200
             if sprite.name == 'brick':
                 if self.player.big and sprite.brick_type == 0:  #when mario is big and brick contains nothing
                     setup.SOUND['brick_smash'].play() #大mario撞碎砖块声音
@@ -444,7 +455,7 @@ class Level:
         # surface.blit(self.background,(0,0),self.game_window) #blit方法把目标图层的特定部分画到原图层的指定位置，第一个参数为目标图层，第三个参数为特定部分不写则为全部，第二个
         #                                     #参数为目标左上角放在原图层的位置
         # surface.blit(self.player.image, self.player.rect)
-        self.info.update()  # 调用信息更新方法，调用金币类更新类更新方法,实现金币闪烁
+        self.info.update(self.game_info)  # 调用信息更新方法，调用金币类更新类更新方法,实现金币闪烁
         self.info.draw(surface)
 
 

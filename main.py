@@ -13,12 +13,12 @@ def main():
         'game_over': load_screen.GameDver(),
 
 
-        '''test'''
+
         'level2': level2.Level2(),
         'load_level2': load_screen.Load_level2()
 
     }
-
+    '''test'''
     game=tools.Game(state_dict,'main_menu')   #初始化游戏主控
     # state=main_menu.MainMenu()   #初始化主页面
     # state = level.Level()

@@ -13,16 +13,19 @@ import source.tools
 class MainMenu():
     def __init__(self):
         game_info={
+            'statue':'main_menu',
             'score':0,
+            'top_score':0,
             'coin':0,
-            'current_time':0.0,
+            'current_time':0,
             'lives':1,
             'player_state':'small',
             'time':300
         }
-        self.start(game_info)
+        self.start(game_info,0.0)
 
-    def start(self,game_info):
+    def start(self,game_info,current_time):
+        self.current_time=current_time
         self.game_info=game_info
         self.setup_background()   #设置背景底图
         self.setup_cursor()       #设置光标
@@ -65,9 +68,12 @@ class MainMenu():
                 #setup.SOUND['one_up'].play()
                 self.finished = True
 
-    def update(self,surface,keys):
+    def update(self,surface,keys,current_time):
         import random
         # surface.fill((random.randint(0,255),random.randint(0,255),random.randint(0,255)))
+        self.current_time =current_time
+        self.game_info['current_time'] =self.current_time
+
         self.update_cursor(keys)  #调用更新光标方法
 
         surface.blit(self.background, self.viewport)  #在可见屏幕上画出背景
@@ -75,8 +81,10 @@ class MainMenu():
         surface.blit(self.play_image,(110,490))    #画上角色
         surface.blit(self.cursor.image,self.cursor.rect)    #画上光标
 
-        self.info.update()    #调用信息更新方法，调用金币类更新类更新方法,实现金币闪烁
+        self.info.update(self.game_info)    #调用信息更新方法，调用金币类更新类更新方法,实现金币闪烁
         self.info.draw(surface) ##画出文字信息，金币。当state='load_screen',画出马里奥
+
+
 
 if __name__ == '__main__':
     menu=MainMenu()

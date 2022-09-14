@@ -121,7 +121,8 @@ class Fireflower(Powerup):
 
 
 class Fireball(Powerup):
-    def __init__(self,centerx,centery,direction):
+    def __init__(self,centerx,centery,direction,game_info):
+        self.game_info=game_info
         frame_rects=[(96,144,8,8),(104,144,8,7),(96,152,8,8),(104,152,8,8) #旋转
                     ,(112,144,16,16),(112,160,16,16),(112,176,16,16) ]  #爆炸
         Powerup.__init__(self,centerx,centery,frame_rects)
@@ -150,6 +151,7 @@ class Fireball(Powerup):
                     self.timer =self.current_time
                     self.image=self.frames[self.frames_index]
                 else:
+
                     self.kill()
 
     def update_position(self, level):
@@ -168,6 +170,7 @@ class Fireball(Powerup):
         enemy =pygame.sprite.spritecollideany(self,level.enemy_group)
         if enemy:
             enemy.kill()
+            self.game_info['score'] += 100
             self.frames_index = 4
             self.state = 'boom'
 

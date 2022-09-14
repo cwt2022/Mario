@@ -438,7 +438,7 @@ class Player(pygame.sprite.Sprite):
         setup.SOUND['fireball'].play()
         if self.current_time-self.last_fireball_timer>300:
             self.frame_index =6
-            fireball=powerup.Fireball(self.rect.centerx,self.rect.centery,self.face_rigth)
+            fireball=powerup.Fireball(self.rect.centerx,self.rect.centery,self.face_rigth,level.game_info)
             level.powerup_group.add(fireball) #加入精灵组，在level里直接调用update和draw即可显示
             self.can_shoot=False
             self.last_fireball_timer=self.current_time

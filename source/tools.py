@@ -17,6 +17,7 @@ class Game():
         self.keys=pygame.key.get_pressed() #获取按键状态
         self.state_dict=state_dict  #获取主菜单的状态字典
         self.state=self.state_dict[start_state] #保存传入的状态（初始化该状态的类）
+        self.current_time = 0.0
 
     def update(self):
         if self.state.finished: #判断该状态是否结束
@@ -24,8 +25,8 @@ class Game():
             next_state=self.state.next
             self.state.finished=False
             self.state=self.state_dict[next_state]
-            self.state.start(game_info)
-        self.state.update(self.screen,self.keys)  #当前状态为结束，调用该状态的更新方法
+            self.state.start(game_info,self.current_time)
+        self.state.update(self.screen,self.keys,self.current_time)  #当前状态为结束，调用该状态的更新方法
 
     def run(self):
 
@@ -87,6 +88,29 @@ def get_image(sheet,x,y,width,height,colorkey,scale):
     return image
 
 
+class _State(object):
+    def __init__(self):
+        self.start_time = 0.0
+        self.current_time = 0.0
+        self.done = False
+        self.quit = False
+        self.next = None
+        self.previous = None
+        self.persist = {}
+
+    def get_event(self, event):
+        pass
+
+    def start(self,persistant,current_time):
+        self.persist = persistant
+        self.start_time = current_time
+
+    def cleanup(self):
+        self.done = False
+        return self.persist
+
+    def update(self, surface, keys, current_time):
+        pass
 
 
 if __name__ == '__main__':

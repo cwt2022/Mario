@@ -10,7 +10,7 @@ from source import tools,setup,constants,sound
 import pygame
 
 class Level2:
-    def start(self,game_info):
+    def start(self,game_info,current_time):
 
 
         self.game_info=game_info
@@ -24,7 +24,7 @@ class Level2:
 
 
 
-    def update(self,surface,keys):
+    def update(self,surface,keys,current_time):
         self.current_time = pygame.time.get_ticks()
 
         #setup.MUSIC['main_theme'].play()
@@ -34,5 +34,5 @@ class Level2:
     def draw(self,surface):
         surface.fill((random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)))
 
-        self.info.update()  # 调用信息更新方法，调用金币类更新类更新方法,实现金币闪烁
+        self.info.update(self.game_info)  # 调用信息更新方法，调用金币类更新类更新方法,实现金币闪烁
         self.info.draw(surface)
