@@ -47,7 +47,7 @@ class Info():
         if self.game_info['statue']=='level':
             """Creates the count down clock for the level"""
             self.current_time = pygame.time.get_ticks()  # 获取当前时间
-            print(self.current_time)
+            #print(self.current_time)
             if self.time==402:
                 self.time-=1
                 self.timer=self.current_time

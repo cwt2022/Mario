@@ -146,17 +146,17 @@ class Level:
         self.finial_group=pygame.sprite.Group()
         '''测试用'''
         # for item in [{"x":470, "y":116, "type":0},
-        # {"x":505, "y": 97, "type":1},
-        # {"x":505, "y":137, "type":1},
-        # {"x":505, "y":177, "type":1},
-        # {"x":505, "y":217, "type":1},
-        # {"x":505, "y":257, "type":1},
-        # {"x":505, "y":297, "type":1},
-        # {"x":505, "y":337, "type":1},
-        # {"x":505, "y":377, "type":1},
-        # {"x":505, "y":417, "type":1},
-        # {"x":505, "y":450, "type":1},
-        # {"x":497, "y": 97, "type":2}]:
+        #     {"x":505, "y": 97, "type":1},
+        #     {"x":505, "y":137, "type":1},
+        #     {"x":505, "y":177, "type":1},
+        #     {"x":505, "y":217, "type":1},
+        #     {"x":505, "y":257, "type":1},
+        #     {"x":505, "y":297, "type":1},
+        #     {"x":505, "y":337, "type":1},
+        #     {"x":505, "y":377, "type":1},
+        #     {"x":505, "y":417, "type":1},
+        #     {"x":505, "y":450, "type":1},
+        #     {"x":497, "y": 97, "type":2}]:
         for item in self.map_data['flagpole']:
             x,y,type=item['x'],item['y'],item['type']
             if type ==0:
@@ -259,7 +259,17 @@ class Level:
         check_group=pygame.sprite.Group(self.ground_items_group,self.brick_group,self.box_group)#两个精灵组的精灵都加进新的精灵组
         ground_item =pygame.sprite.spritecollideany(self.player,check_group)
 
+        player_colided_flag=pygame.sprite.spritecollideany(self.player,self.pole_group)
+        #print('11',player_colided_flag,self.pole_group)
+
+        self.player.baoqi = False
+        if player_colided_flag:
+            #print('发生碰撞')
+            self.player.baoqi = True
+            self.game_info['score'] += 1000
+            self.adjust_player_x(player_colided_flag)
         if ground_item:
+
             self.adjust_player_x(ground_item)
 
         if self.player.hurt_imune:
@@ -310,7 +320,7 @@ class Level:
                 self.player.state ='big2fire'
                 powerup.kill()
 
-
+        #print(self.player.state)
 
     def check_y_collisions(self):
         # check_group = pygame.sprite.Group( self.ground_items_group,self.brick_group,self.box_group)

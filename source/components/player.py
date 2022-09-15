@@ -39,6 +39,7 @@ class Player(pygame.sprite.Sprite):
         self.can_jump=True #目的让其松开跳跃按键，才能再次跳跃
         self.hurt_imune =False
         self.can_shoot =True #可以发射
+        self.baoqi=False  #是否抱旗子
 
     def setup_velocities(self):  #设置速率
         print('111')
@@ -191,6 +192,7 @@ class Player(pygame.sprite.Sprite):
         elif self.state == 'big2fire':
             self.big2fire(keys)
 
+
         if self.face_rigth:
             self.image =self.right_frames[self.frame_index]
         else:
@@ -313,6 +315,8 @@ class Player(pygame.sprite.Sprite):
         #     self.rect.bottom = constants.GROUND_HEIGHT
         #     self.y_vel=0
         #     self.state='walk'
+        if self.baoqi:
+            self.frame_index=10
 
         if keys[pygame.K_RIGHT]:
             self.x_vel = self.calc_vel(self.x_vel, self.x_accel, self.max_x_vel, True)
