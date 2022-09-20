@@ -50,12 +50,16 @@ class Box(pygame.sprite.Sprite):
             self.open()
 
     def rest(self): #好好呆着状态，实现金币闪烁
-        frame_durtions =[400,100,100,50]
-        if self.current_time - self.timer > frame_durtions[self.frames_index]:
-            self.frames_index=(self.frames_index+1)%4
+        if self.box_type == 5:
+            self.image=pygame.Surface((1,1))
 
-            self.timer = self.current_time
-        self.image =self.frames[self.frames_index]
+        else:
+            frame_durtions =[400,100,100,50]
+            if self.current_time - self.timer > frame_durtions[self.frames_index]:
+                self.frames_index=(self.frames_index+1)%4
+
+                self.timer = self.current_time
+            self.image =self.frames[self.frames_index]
 
         #print('look here')
     def go_bumped(self):
@@ -74,12 +78,17 @@ class Box(pygame.sprite.Sprite):
             #box_type 0,1,2,3对应 空，金币，星星，蘑菇
             if self.box_type == 1:
                 pass
-            else:
+            elif self.box_type==3:
                 if level.player.big:
-                    self.group.add(create_powerup(self.rect.centerx,self.rect.centery,self.box_type,0))
-                else:
                     self.group.add(create_powerup(self.rect.centerx,self.rect.centery,self.box_type,1))
+                else:
+                    self.group.add(create_powerup(self.rect.centerx,self.rect.centery,self.box_type,0))
                 print(self.group)
+            elif self.box_type==4:
+                self.group.add(create_powerup(self.rect.centerx, self.rect.centery, self.box_type, 3))
+            elif self.box_type==5:
+                self.group.add(create_powerup(self.rect.centerx, self.rect.centery, self.box_type, 2))
+
 
     def open(self):
         pass

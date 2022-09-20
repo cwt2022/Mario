@@ -72,10 +72,11 @@ class Brick(pygame.sprite.Sprite):
             elif self.brick_type==1:
                 self.state='open'
             else:
-                if level.player.big:
-                    self.group.add(create_powerup(self.rect.centerx, self.rect.centery, self.brick_type, 0))
-                else:
-                    self.group.add(create_powerup(self.rect.centerx, self.rect.centery, self.brick_type, 1))
+                # if level.player.big:
+                #     self.group.add(create_powerup(self.rect.centerx, self.rect.centery, self.brick_type, 0))
+                # else:
+                #     self.group.add(create_powerup(self.rect.centerx, self.rect.centery, self.brick_type, 1))
+                self.group.add(create_powerup(self.rect.centerx, self.rect.centery, self.brick_type, 3))
                 self.state='open'
                 #print(self.state)
     def open(self):

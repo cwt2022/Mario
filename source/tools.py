@@ -46,7 +46,7 @@ class Game():
             # self.screen.blit(image,(300,300))
 
             pygame.display.update()
-            self.clock.tick(30)
+            self.clock.tick(60)
 def load_graphics(path,accept=('.jpg','.png','.bmp','.gif')):
     graphics={}
     for pic in os.listdir(path):

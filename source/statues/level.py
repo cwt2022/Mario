@@ -23,7 +23,7 @@ class Level:
         self.flag=plagpole.Flag(470,116)
         # self.finial=plagpole.Finial(497,97)
         #self.pole=plagpole.Pole(200,400)
-        print(self.flag)
+        #print(self.flag)
         self.load_map_data()
         self.setup_background()
         self.setup_start_posotions()#新建起始位置的方法
@@ -35,7 +35,7 @@ class Level:
         self.setup_flag()
 
         self.sound=sound.Sound(self)
-        print(self.sound)
+        #print(self.sound)
 
 
     def load_map_data(self):
@@ -44,13 +44,13 @@ class Level:
         with open(file_path) as f:
             self.map_data= json.load(f)
     def setup_background(self):
-        self.image_name=self.map_data['image_name']
-        self.background = setup.GRAPHICS[self.image_name]
-        rect =self.background.get_rect()
+        self.image_name=self.map_data['image_name']  #获取关卡名称
+        self.background = setup.GRAPHICS[self.image_name] #按照关卡名取出关卡图
+        rect =self.background.get_rect() #获取背景图矩形边框
         self.background = pygame.transform.scale(self.background,(int(rect.width*constants.BG_MULTI),
-                                                             int(rect.height*constants.BG_MULTI)))
+                                                             int(rect.height*constants.BG_MULTI)))  #放大
         self.background_rect = self.background.get_rect()
-        self.game_window=setup.SCREEN.get_rect()  #获得窗口大小
+        self.game_window=setup.SCREEN.get_rect()  #获得显示窗口大小
         self.game_ground= pygame.Surface((self.background_rect.width,self.background_rect.height))#新建一个背景大小般的图层
 
     def setup_start_posotions(self):
@@ -65,18 +65,19 @@ class Level:
                 self.ground_items_group.add(stuff.Item(item['x'],item['y'],item['width'],item['height'],name))
 
     def setup_player(self):
-        self.player =player.Player('mario')
+        self.player =player.Player('mario') #初始化角色精灵
         # self.player.rect.x = 300
         # self.player.rect.y = 490
-        self.player.rect.x=self.game_window.x+self.player_x
+        self.player.rect.x=self.game_window.x+self.player_x  #让角色所处矩形的位置为滑动窗口的位置加上角色的x坐标
         self.player.rect.bottom=self.player_y
 
 
     def setup_brick_and_box(self):
-        self.brick_group = pygame.sprite.Group()
-        self.box_group= pygame.sprite.Group()
-        self.coin_group=pygame.sprite.Group() #存放开箱出来的金币
-        self.powerup_group = pygame.sprite.Group() #存放开箱的道具
+        self.brick_group = pygame.sprite.Group() #存放砖块
+        self.box_group= pygame.sprite.Group()   #存放宝箱
+        self.coin_group=pygame.sprite.Group()  #存放开箱出来的金币
+        self.powerup_group = pygame.sprite.Group()  #存放开箱的道具
+
         if 'brick' in self.map_data:
             for brick_data in self.map_data['brick']:
                 x,y=brick_data['x'],brick_data['y']
@@ -86,7 +87,7 @@ class Level:
                         # TODO batch bricks
                         pass
                     else:
-                        self.brick_group.add(brick.Brick(x,y,brick_type,None))
+                        self.brick_group.add(brick.Brick(x,y,brick_type,None)) #砖块精灵加入砖块组
                         #print('test',brick.Brick(x,y,brick_type))
                 elif brick_type == 1:
                     self.brick_group.add(brick.Brick(x,y,brick_type,self.coin_group))
@@ -100,6 +101,8 @@ class Level:
                     self.box_group.add(box.Box(x, y, box_data,self.coin_group))
                 else:
                     self.box_group.add(box.Box(x, y, box_data,self.powerup_group))
+                # elif box_data == 5:
+                #     self.box_group.add(box.Box(x, y, box_data, self.powerup_group))
 
     '''myself'''
     # def setup_enemy(self):
@@ -175,6 +178,7 @@ class Level:
             self.checkpoint_group.add(stuff.Checkpoint(x,y,w,h,checkpoint_type,enemy_groupid))
 
     def update(self,surface,keys,current_time):
+        #print(self.player.rect.x)
         self.current_time = pygame.time.get_ticks()
         self.player.update(keys,self)
         self.info.update(self.game_info)
@@ -220,13 +224,14 @@ class Level:
         self.draw(surface)
 
     def is_or_not_finished(self):
+        #print(self.player.baoqi,self.player.rect.y)
+        if self.player.baoqi== True and self.player.rect.y>400:
 
-        if self.player.rect.x > 9000:
             self.finished=True
             self.next = 'load_level2'
 
     def is_frozen(self):
-        return self.player.state in ['small2big','big2small','big2fire','fire2small']
+        return self.player.state in ['small2big','big2small','big2fire','fire2small','livesAdd1']
 
     def update_player_position(self): #更新人物位置
 
@@ -261,6 +266,8 @@ class Level:
 
         player_colided_flag=pygame.sprite.spritecollideany(self.player,self.pole_group)
         #print('11',player_colided_flag,self.pole_group)
+
+
 
         self.player.baoqi = False
         if player_colided_flag:
@@ -305,21 +312,32 @@ class Level:
         if powerup:
 
             if powerup.name=='fireball':
-                #
-                print(powerup.rect.x,powerup.rect.y)
-                print('发球')
+                pass
+                #print(powerup.rect.x,powerup.rect.y)
+                #print('发球')
 
             elif powerup.name=='mushroom' :
                 self.game_info['score'] += 1000
                 setup.SOUND['pipe'].play()#变身
                 self.player.state = 'small2big'
                 powerup.kill()
-            else:
+            elif powerup.name=='fireflower':
                 self.game_info['score'] += 1000
                 setup.SOUND['powerup'].play()
                 self.player.state ='big2fire'
                 powerup.kill()
-
+            elif powerup.name == 'lifemushroom':
+                self.game_info['score'] += 1000
+                setup.SOUND['powerup'].play()
+               #可以给人物加一个状态，头上显示生命+1
+                self.player.state='livesAdd1'
+                self.game_info['lives'] +=1
+                powerup.kill()
+            elif powerup.name == 'star':
+                self.game_info['score'] += 1000
+                setup.SOUND['powerup'].play()
+                self.player.hurt_imune = True  # 伤害免疫
+                powerup.kill()
         #print(self.player.state)
 
     def check_y_collisions(self):
@@ -349,9 +367,9 @@ class Level:
             if self.player.hurt_imune:
                 return
             self.enemy_group.remove(enemy)#移出野怪组  ??
-            print(self.game_info['score'])
+            #print(self.game_info['score'])
             self.game_info['score'] +=100
-            print(self.game_info['score'])
+            #(self.game_info['score'])
             if enemy.name == 'koopa':
                 self.shell_group.add(enemy)
 
@@ -404,6 +422,7 @@ class Level:
                 if sprite.state == 'rest':
                     sprite.go_bumped()  #小mario撞击砖块声音
                     setup.SOUND['bump'].play()
+
 
     def is_enemy_on(self,sprite):
         sprite.rect.y -=1 #向上试探一下

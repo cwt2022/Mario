@@ -24,7 +24,7 @@ class Info():
         self.create_info_labels()    #创建各阶段通用性息
         self.create_update_labels()   #创建要更新的内容
         self.create_score_group(self.score)
-
+        self.draw_lives_add()
         self.time_labels=[]
         self.create_countdown_clock()
 
@@ -115,7 +115,9 @@ class Info():
         self.create_score_group(level_info['score'])
         self.create_coin_counter(level_info['coin'])
         """Updates info based on what state the game is in"""
-
+    def draw_lives_add(self,):
+        self.lives_labels=[]
+        #self.lives_labels.append((self.create_lable('lives + 1'), (272, 360)))
 
     def draw(self,surface):
         # surface.blit(self.create_lable('GIVE ME A LITTLE HEATRT~',size=60),(100,400))
@@ -129,6 +131,10 @@ class Info():
             surface.blit(label[0], label[1])
         for label in self.time_labels:  # 画出更新后的金币信息
             surface.blit(label[0], label[1])
+        if self.lives_labels:
+            for label in self.lives_labels:
+                surface.blit(label[0], label[1])
+            self.lives_labels.clear()
         surface.blit(self.flash_coin.image,self.flash_coin.rect)    #画出金币
 
         if self.state == 'load_screen':

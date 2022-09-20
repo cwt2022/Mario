@@ -4,11 +4,51 @@ source
     components成分,部件
         -box.py 盒子(游戏中带问号的方格)
         -brick.py 砖块
+                def __init__(self,x,y,brick_type,group,color=None,name='brick'):
+
         -coin.py 金币
         -enemy.py 敌人
         -player.py 主角
+                def __init__(self,name):
+                    pygame.sprite.Sprite.__init__(self)
+                    self.name = name
+                    self.load_data()  #加载角色数据，各种造型帧即其各种状态的速度
+                    self.setup_states()  #初始化角色各种状态
+                    self.setup_velocities()  #设置速率
+                    self.setup_timers()  #设置计时器
+                    self.load_images()  #载入主角的各种帧造型
+                def update(self,keys,level):
+                    self.current_time = pygame.time.get_ticks()  #以毫秒为单位获取时间
+                    self.handle_states(keys,level) #处理各种状态
+                    self.is_hurt_immune() #判断是否为无敌模式
+                def handle_states(self,keys,level): #处理各种状态
+
+
         -powerup.py 强化（游戏中蘑菇）
+            def create_powerup(centerx,centery,type,flag):
+                """create powerup based on type and mario state"""
+                if flag ==0:
+                    return Mushroom(centerx,centery)
+                elif flag ==1:
+                    return Fireflower(centerx, centery)
+                elif flag ==2:
+                    return LifeMushroom(centerx, centery)
+                elif flag == 3:
+                    return Star(centerx, centery)
+
         -stuff.py 物品（不起眼的小道具，旗子水管等）
+            class Item(pygame.sprite.Sprite):
+                def __init__(self,x,y,w,h,name):
+                    '''每个物品都有了隐形的轮廓，方便使用，方便进行碰撞检测，不需要传入图像，因为地图上有这些的图像了'''
+                    pygame.sprite.Sprite.__init__(self)
+
+            class Checkpoint(Item):
+            '''检查点实际就是一个长方体精灵，碰到之后才会触发下面的事件'''
+                def __init__(self, x, y, w, h, checkint_type, enemy_groupid=None, name='checkpoint'):
+                    Item.__init__(self,x,y,w,h,name)
+                    self.checkpoint_type = checkint_type
+                    self.enemy_groupid = enemy_groupid
+
         -info.py 游戏信息（显示在屏幕上方的英文字体等）
             def __init__(self,state):
                 self.state = state
@@ -23,28 +63,78 @@ source
     states状态
         -main_menu.py 主页面（游戏刚进入的主菜单）
             -MainMenu()类
-                def __init__(self):
-                      self.setup_background()   #设置背景底图
-                      self.setup_cursor()       #设置光标
-                      self.setup_palyer()        #设置游戏角色
-                      self.info=info.Info('main_menu')   #设置文字信息
-                      self.finished=False     #主页面是否结束（状态机）
-                      self.next = 'load_screen' #下一个状态
-                def setup_background(self): #设置背景底图
-                def setup_palyer(self): #设置角色
-                def setup_cursor(self):  #设置光标
-                def update_cursor(self,keys):  #更新光标
-                def update(self,surface,keys):  #更新画面
+              def __init__(self): #初始化游戏信息字典
+                    game_info={
+                    }
+              def start(self,game_info,current_time):  #使用start函数对该状态进行初始化，
+                    self.current_time=current_time
+                    self.game_info=game_info
+                    self.setup_background()   #设置背景底图
+                    self.setup_cursor()       #设置光标
+                    self.setup_palyer()        #设置游戏角色
+                    self.info=info.Info('main_menu',self.game_info)   #初始化该类，设置文字信息
+                    self.finished=False     #主页面是否结束（状态机）
+                    self.next = 'load_screen'
+              def update()
+
         -load_screen.py 载入页面
+             def start(self,game_info,current_time):
+                self.game_info=game_info #获取信息
+                self.game_info['statue']='load_screen' #修改游戏状态
+                self.finished= False #告诉程序当前状态未结束
+                self.next = 'level' #下个关卡为level
+                self.duration=2000 #持续时间
+                self.timer = 0  #定时器
+                self.info = info.Info('load_screen',self.game_info) #初始化页面信息
+             def update():
+             def draw():
         -level.py 游戏关卡
+         def start(self,game_info,current_time):
+
+                self.current_time=current_time
+                self.game_info=game_info
+                self.game_info['statue'] = 'level'
+                self.finished= False
+                self.next = 'game_over'
+
+                self.info=info.Info('level',self.game_info)
+
+                #self.flag=plagpole.Flag(470,116)
+
+                self.load_map_data()  #加载关卡数据
+                self.setup_background() #设置背景，新建了一个北京大小的图层
+                self.setup_start_posotions()#新建起始位置的方法
+                self.setup_player()
+                self.setup_ground_items() #设置大地，管道，楼梯，加载到精灵组
+                self.setup_brick_and_box()
+                self.setup_enemy()
+                self.setup_checkpoints()    #初始化检查点
+                self.setup_flag()
+
+                self.sound=sound.Sound(self)
     constants.py 存储游戏常量
     sound.py 音效/音乐
     set_up.py 启动代码（如设置屏幕宽高，载入素材等）
     tools.py 主控，工具代码 （好用的工具，如图片加载工具）
          -Game()类，游戏主控. Game().run运行游戏. Game().update更新游戏
+              def __init__(self,state_dict,start_state):
+                self.screen=pygame.display.get_surface() #获取当前显示的 Surface 对象,获得屏幕
+                self.clock=pygame.time.Clock()#创建一个时钟，控制帧率
+                self.keys=pygame.key.get_pressed() #获取按键状态
+                self.state_dict=state_dict  #获取主菜单的状态字典
+                self.state=self.state_dict[start_state] #保存传入的状态（初始化该状态的类）
+              def update(self):
+                -判断游戏当前状态是否结束，如果结束就传入下一个状态，初始化该状态并调用该状态的start()方法，目的是传递游戏数据。没有结束就调用当前状态的更新方法
+              def run(self):
+                -循环获取事件，监听事件状态(键盘按键)
+                -调用自身update方法
+                -更新屏幕
+                -设置游戏帧率（越大越流畅）
          -load_graphics(path:图片路径)函数：加载图片 return:graphics{name:img}   本项目加载的是一张大图，大图上有很多小图
             -pygame.image.load("图片路径").convert()
          -get_image(sheet:传入加载后的图片,x:图片在大图的x坐标,y：图片在大图的y坐标,width：图片宽,height：图片高,colorkey：改颜色设置为透明,scale：放大倍速)
+         -load_all_music(directory, accept=('.wav', '.mp3', '.ogg', '.mdi')): #加载音乐
+         -load_all_sound(directory, accept=('.wav','.mpe','.ogg','.mdi')): #加载按键声
 
 难点：
 
@@ -73,3 +163,5 @@ source
     bug:mario从右边碰到物体会身体会嵌入一些
 
     精灵组：为了方便碰撞检测和统一操作
+
+    mario吃蘑菇变身时只写了x方向检测，注意y方向检车会使mario变成fallz状态

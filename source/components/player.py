@@ -12,8 +12,8 @@ class Player(pygame.sprite.Sprite):
     def __init__(self,name):
         pygame.sprite.Sprite.__init__(self)
         self.name = name
-        self.load_data()
-        self.setup_states()
+        self.load_data()  #加载角色数据，各种造型帧即其各种状态的速度
+        self.setup_states()  #初始化角色各种状态
         self.setup_velocities()
         self.setup_timers()
         self.load_images()
@@ -32,25 +32,27 @@ class Player(pygame.sprite.Sprite):
 
     def setup_states(self):  #给主角套buf,套各种状态
         self.state='stand'  #初始状态为站立
-        self.face_rigth = True
-        self.dead = False
-        self.big =False
-        self.fire = False
+        self.face_rigth = True #面朝右
+        self.dead = False #没有死亡
+        self.big =False #没有变大
+        self.fire = False #不能发火球
         self.can_jump=True #目的让其松开跳跃按键，才能再次跳跃
-        self.hurt_imune =False
-        self.can_shoot =True #可以发射
+        self.hurt_imune =False #是否为无敌状态
+        self.can_shoot =True #可以发射火球
         self.baoqi=False  #是否抱旗子
+        self.last_squat = True
+
 
     def setup_velocities(self):  #设置速率
         print('111')
-        speed=self.palyer_data["speed"]  #????????????????????
+        speed=self.palyer_data["speed"]  #加载角色速度
         print(speed)
-        self.x_vel = 0
-        self.y_vel = 0
+        self.x_vel = 0 #初始水平方向速度为0
+        self.y_vel = 0 #初始垂直方向速度为0
 
         self.max_walk_vel= speed['max_walk_speed']
         self.max_run_speed =  speed['max_run_speed']
-        self.max_y_velocity =  speed['max_y_velocity']
+        self.max_y_velocity =  speed['max_y_velocity'] #垂直方向最大速度
         self.walk_accel= speed['walk_accel']
         self.run_accel =  speed['run_accel']
         self.turn_accel = speed['turn_accel'] #转身时的加速度，或者说减速度
@@ -65,15 +67,16 @@ class Player(pygame.sprite.Sprite):
 
     def setup_timers(self):  #创建计时器
         self.walking_timer = 0
-        self.transtion_timer = 0
+        self.transtion_timer = 0  ##？？
         self.last_time = 0
         self.death_timer = 0
         self.hurt_imune_timer=0 #记录伤害免疫的时间
         self.last_fireball_timer=0 #控制子弹发射间隔
+        self.levies_add_time=0
 
     def load_images(self):   #载入主角的各种帧造型
         sheet =setup.GRAPHICS['mario_bros']
-        frame_rects=self.palyer_data['image_frames']#加载帧???
+        frame_rects=self.palyer_data['image_frames']#加载帧
 
         self.rigth_small_normal_frames = []
         self.rigth_big_normal_frames = []
@@ -96,7 +99,7 @@ class Player(pygame.sprite.Sprite):
 
         ]
 
-        self.right_frames = self.rigth_small_normal_frames
+        self.right_frames = self.rigth_small_normal_frames  #刚开始用的是小号帧
         self.left_frames=self.left_small_normal_frames
 
         # self.right_frames =[]
@@ -134,14 +137,15 @@ class Player(pygame.sprite.Sprite):
         # self.frames=[]
         # self.frames.append(tools.get_image(sheet,178,32,12,16,(0,0,0),constants.BG_MULTI))
 
-        self.frame_index = 0
-        self.frames = self.right_frames
-        self.image = self.frames[self.frame_index]
-        self.rect = self.image.get_rect()
+        self.frame_index = 0  #取出造型是用到的索引
+        self.frames = self.right_frames   #刚开始是脸朝右
+        self.image = self.frames[self.frame_index]  #取出第一帧，小号脸朝右
+        self.rect = self.image.get_rect() #获取其边框矩形
     def update(self,keys,level):
         self.current_time = pygame.time.get_ticks()  #以毫秒为单位获取时间
         self.handle_states(keys,level) #处理各种状态
-        self.is_hurt_immune()
+        self.is_hurt_immune() #判断是否为无敌模式
+       # print(self.rect.x)
         # if keys[pygame.K_RIGHT]:
         #     self.x_vel = 5
         #     self.y_vel = 0
@@ -173,12 +177,14 @@ class Player(pygame.sprite.Sprite):
 
 
     def handle_states(self,keys,level):
-        self.can_jump_or_not(keys)
-        self.cans_shoot_or_not(keys)
+        self.can_jump_or_not(keys) #判断是否可以跳跃
+        self.cans_shoot_or_not(keys)  #判断是否可以补充子弹
         if self.state == 'stand':
             self.stand(keys,level)
         elif self.state == 'walk':
             self.walk(keys,level)
+        elif self.state == 'squat':
+            self.squat(keys,level)
         elif self.state == 'jump':
             self.jump(keys,level)
         elif self.state == 'fall':
@@ -191,6 +197,9 @@ class Player(pygame.sprite.Sprite):
             self.big2small(keys)
         elif self.state == 'big2fire':
             self.big2fire(keys)
+        elif self.state == 'livesAdd1':
+            self.livesAdd1(level)
+
 
 
         if self.face_rigth:
@@ -205,6 +214,12 @@ class Player(pygame.sprite.Sprite):
     def cans_shoot_or_not(self,keys): #补子弹
         if not keys[pygame.K_d]:
             self.can_shoot=True
+
+    def can_squat_or_not(self, keys):
+        if not keys[pygame.K_DOWN]:
+
+           self.last_squat=False
+
 
 
     def stand(self,keys,level):
@@ -227,9 +242,34 @@ class Player(pygame.sprite.Sprite):
         elif keys[pygame.K_d] and self.fire  and self.can_shoot:
             self.shot_fireball(level)
 
+        # elif keys[pygame.K_DOWN] and self.big:
+        #     if self.last_squat:
+        #
+        #         self.state='squat'
 
 
-
+    # def squat(self,keys,level):
+    #     last_frame_bottom = self.rect.bottom
+    #     self.frame_index=7
+    #     self.rect = self.image.get_rect()
+    #     self.rect.bottom=last_frame_bottom
+    #     if keys[pygame.K_RIGHT]:
+    #         self.face_rigth = True
+    #         self.state = 'walk'
+    #     elif keys[pygame.K_LEFT]:
+    #         self.face_rigth = False
+    #         self.state = 'walk'
+    #     elif keys[pygame.K_a] and self.can_jump:
+    #         self.state = 'jump'
+    #         self.y_vel = self.jump_velocity
+    #
+    #         setup.SOUND['small_jump'].play()
+    #
+    #
+    #     elif keys[pygame.K_d] and self.fire and self.can_shoot:
+    #         self.shot_fireball(level)
+    #
+    #     self.can_squat_or_not(keys)
     def walk(self,keys,level):
         if keys[pygame.K_s]:  #按s超级加速
             self.max_x_vel=self.max_run_speed
@@ -397,6 +437,23 @@ class Player(pygame.sprite.Sprite):
                 self.state = 'walk'
                 self.right_frames = self.rigth_big_fire_frames
                 self.left_frames = self.left_big_fire_frames
+
+    def livesAdd1(self,level):
+        if self.levies_add_time==0:
+            print('我来了1')
+            self.levies_add_time=self.current_time
+        elif self.current_time-self.levies_add_time >100:
+            self.levies_add_time = self.current_time
+            level.info.lives_labels.clear()
+            self.state='walk'
+            print('我来了2')
+            #xiaobug 第二次进来不。。。
+        else:
+            y=self.rect.top-50
+            level.info.lives_labels.append((level.info.create_lable('lives + 1'),(252,y)))
+            print('我来了3')
+
+
 
     def change_player_image(self,frames,index):
         self.frame_index=index
