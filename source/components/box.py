@@ -77,7 +77,8 @@ class Box(pygame.sprite.Sprite):
 
             #box_type 0,1,2,3对应 空，金币，星星，蘑菇
             if self.box_type == 1:
-                pass
+                self.group.add(Creat_coin(self.rect.centerx,self.rect.centery))
+                self.group.add(Text_info(self.rect.centerx,self.rect.centery,'+ 200'))
             elif self.box_type==3:
                 if level.player.big:
                     self.group.add(create_powerup(self.rect.centerx,self.rect.centery,self.box_type,1))
@@ -92,3 +93,112 @@ class Box(pygame.sprite.Sprite):
 
     def open(self):
         pass
+
+class Creat_coin(pygame.sprite.Sprite):
+    def __init__(self,centerx,centery):
+        pygame.sprite.Sprite.__init__(self)
+        self.name='coin'
+        frame_rects=[(0, 112, 16, 16),(16,112,16,16),(32,112,16,16),(48,112,16,16)]
+        self.frames=[]
+        self.frame_index=0
+        for frame_rect in frame_rects:
+            self.frames.append(tools.get_image(setup.GRAPHICS['item_objects'], *frame_rect, (0, 0, 0), 2.5))
+        self.image=self.frames[self.frame_index]
+        self.rect=self.image.get_rect()
+        self.rect.centerx=centerx
+        self.rect.centery=centery
+        self.origin_y = centery - self.rect.height / 2
+        self.x_vel = 0
+        self.y_vel = -10
+        self.gravity = 1
+        self.max_y_vel = 8
+        self.state = 'grow'
+
+        self.timer = 0  # 计时器
+
+
+
+    def check_y_collisions(self, level):
+
+
+        level.check_will_fail(self)
+
+    def update(self,level):
+        self.current_time = pygame.time.get_ticks()  # 获取当前时间
+        if self.timer == 0:
+            self.timer = self.current_time
+        elif self.current_time - self.timer > 100:
+            self.frame_index += 1
+            self.frame_index %= 4
+            self.timer = self.current_time
+        self.image = self.frames[self.frame_index]
+
+
+        if self.state == 'grow':
+            self.rect.y += self.y_vel
+            if self.rect.bottom < self.origin_y-200:
+                self.state = 'fall'  # 傻了傻了。。用俩等报bug了
+
+
+        elif self.state == 'fall':
+            if self.y_vel < self.max_y_vel:
+                self.y_vel += self.gravity
+
+        self.rect.y += self.y_vel
+        self.check_y_collisions(level)  # y方向碰撞检测
+        print( self.rect.y,self.rect.bottom)
+        if self.rect.y > self.origin_y:
+
+            self.kill()
+
+       # self.update_position(self,level)
+
+
+class Text_info(pygame.sprite.Sprite):
+    def __init__(self, centerx, centery,text):
+        pygame.sprite.Sprite.__init__(self)
+        self.name = 'text_info'
+        font = pygame.font.SysFont(constants.FONT, 40)  # 调用系统字体
+        label_image = font.render(text, 1, (255, 255, 255))  # 把文字渲染成图片
+        self.image = label_image
+        self.rect = self.image.get_rect()
+        self.rect.centerx = centerx+50
+        self.rect.centery = centery
+        self.origin_y = centery - self.rect.height / 2
+        self.x_vel = 0
+        self.y_vel = -5
+        self.gravity = 1
+        self.max_y_vel = 8
+        self.state = 'grow'
+
+    def update_position(self, level):
+
+        self.rect.y += self.y_vel
+        self.check_y_collisions(level)  # y方向碰撞检测
+        if self.rect.y > self.rect.bottom:
+            self.kill()
+
+    def check_y_collisions(self, level):
+
+        level.check_will_fail(self)
+
+    def update(self, level):
+
+
+        if self.state == 'grow':
+            self.rect.y += self.y_vel
+            if self.rect.bottom < self.origin_y - 200:
+                self.state = 'fall'  # 傻了傻了。。用俩等报bug了
+
+
+        elif self.state == 'fall':
+            if self.y_vel < self.max_y_vel:
+                self.y_vel += self.gravity
+
+        self.rect.y += self.y_vel
+        self.check_y_collisions(level)  # y方向碰撞检测
+        print(self.rect.y, self.rect.bottom)
+        if self.rect.y > self.origin_y:
+            self.kill()
+
+    # self.update_position(self,level)

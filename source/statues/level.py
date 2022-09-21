@@ -5,6 +5,7 @@ import json
 import os
 
 from source.components import info,player,stuff,brick,box,enemy,plagpole
+from source.components import box as b
 from source import tools,setup,constants,sound
 import pygame
 
@@ -132,6 +133,7 @@ class Level:
         self.dying_group = pygame.sprite.Group() #野怪死亡后加入该组
         self.shell_group= pygame.sprite.Group()
         self.enemy_group = pygame.sprite.Group()
+        self.text_info_group=pygame.sprite.Group()
         self.enemy_group_dict = {}
         if 'enemy' in self.map_data:
              for enemy_group_data in self.map_data['enemy']:
@@ -193,6 +195,7 @@ class Level:
             pass
         else:
 
+            self.text_info_group.update(self)
             self.update_player_position()
             self.check_checkpoints()
             self.check_if_go_die()
@@ -202,7 +205,7 @@ class Level:
             self.enemy_group.update(self) #需要传入level对象
             self.dying_group.update(self)
             self.shell_group.update(self)
-            self.coin_group.update()
+            self.coin_group.update(self)
             self.powerup_group.update(self)
             self.pole_group.update()
             self.flag_group.update()
@@ -366,6 +369,8 @@ class Level:
         elif enemy and not self.is_frozen():
             if self.player.hurt_imune:
                 return
+            self.text_info_group.add(b.Text_info(enemy.rect.x, enemy.rect.y,'+ 100'))
+
             self.enemy_group.remove(enemy)#移出野怪组  ??
             #print(self.game_info['score'])
             self.game_info['score'] +=100
@@ -460,6 +465,7 @@ class Level:
         self.game_ground.blit(self.background,(self.game_window.x,self.game_window.y),self.game_window)
         self.game_ground.blit(self.player.image, self.player.rect)
 
+        self.text_info_group.draw(self.game_ground)
         self.powerup_group.draw(self.game_ground)
 
         self.brick_group.draw(self.game_ground)  #画出精灵组内容

@@ -4,6 +4,8 @@
 
 import pygame
 from source import setup,tools,constants
+from source.components import box
+
 '''myself'''
 # class Enemy(pygame.sprite.Sprite):
 #     def __init__(self,x,y,direction,type,color=None):
@@ -49,6 +51,7 @@ from source import setup,tools,constants
 #         self.image = self.frames[self.frame_index]
 
 def create_enemy(enemy_data):
+
     enemy_type=enemy_data['type']
     x,y,direction,color = enemy_data['x'],enemy_data['y'],enemy_data['direction'],enemy_data['color']
     #print('11')
@@ -64,6 +67,7 @@ class Enemy(pygame.sprite.Sprite):
     def __init__(self,x,bottom_y,direction,name,frame_rects):
         pygame.sprite.Sprite.__init__(self)
         #print('33')
+
         self.direction=direction
         self.name=name
         self.frame_index = 0
@@ -135,6 +139,7 @@ class Enemy(pygame.sprite.Sprite):
         # if self.y_vel <10:
             self.y_vel += self.gravity
     def die(self):
+
         self.rect.x += self.x_vel
         self.rect.y += self.y_vel
         self.y_vel += self.gravity
@@ -204,6 +209,7 @@ class Enemy(pygame.sprite.Sprite):
 class Goomba(Enemy):
     def __init__(self,x,y,direction,name,color):
         #print('22')
+
         bright_rect_frames = [(0, 16, 16, 16), (16, 16, 16, 16),(32,16,16,16)]
         daek_rect_frames = [(0, 48, 16, 16), (16, 48, 16, 16),(32,48,16,16)]
 
@@ -225,6 +231,7 @@ class Goomba(Enemy):
 class Koopa(Enemy):
     def __init__(self, x, y, direction, name, color):
         #print('44')
+
         bright_rect_frames = [(96, 9, 16, 22), (112, 9, 16, 22), (160, 9, 16, 22)]
         daek_rect_frames = [(96, 9, 16, 22), (112, 9, 16, 22), (160, 9, 16, 22)]
 
