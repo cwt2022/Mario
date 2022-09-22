@@ -21,7 +21,7 @@ class Level:
         self.info=info.Info('level',self.game_info)
 
 
-        self.flag=plagpole.Flag(470,116)
+        #self.flag=plagpole.Flag(470,116)
         # self.finial=plagpole.Finial(497,97)
         #self.pole=plagpole.Pole(200,400)
         #print(self.flag)
@@ -364,6 +364,7 @@ class Level:
             self.adjust_player_y(ground_item)
         elif brick:
             self.adjust_player_y(brick)
+
         elif box:
             self.adjust_player_y(box)
         elif enemy and not self.is_frozen():
@@ -421,6 +422,10 @@ class Level:
                     self.game_info['coin'] +=1
                     self.game_info['score'] += 200
             if sprite.name == 'brick':
+                if sprite.brick_type == 1 and sprite.state=='rest' :
+                    self.text_info_group.add(b.Text_info(sprite.rect.x, sprite.rect.y, '+ 100'))
+                    self.game_info['score'] += 100
+                    self.game_info['coin'] += 1
                 if self.player.big and sprite.brick_type == 0:  #when mario is big and brick contains nothing
                     setup.SOUND['brick_smash'].play() #大mario撞碎砖块声音
                     sprite.smashed(self.dying_group)

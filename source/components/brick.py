@@ -4,6 +4,7 @@
 import pygame
 from source import setup,tools,constants
 from source.components.powerup import create_powerup
+from source.components.box import Creat_coin
 
 class Brick(pygame.sprite.Sprite):
     def __init__(self,x,y,brick_type,group,color=None,name='brick'):
@@ -36,6 +37,7 @@ class Brick(pygame.sprite.Sprite):
 
         self.state = 'rest'
         self.timer = 0
+        self.count = 0
 
     def update(self,level):
         self.current_time = pygame.time.get_ticks()
@@ -70,7 +72,11 @@ class Brick(pygame.sprite.Sprite):
             if self.brick_type==0:
                 self.state='rest'
             elif self.brick_type==1:
-                self.state='open'
+                self.count+=1
+                self.group.add(Creat_coin(self.rect.centerx, self.rect.centery))
+                if self.count==8:
+                    self.state='open'
+                    # self.group.add(Creat_coin(self.rect.centerx, self.rect.centery))
             else:
                 # if level.player.big:
                 #     self.group.add(create_powerup(self.rect.centerx, self.rect.centery, self.brick_type, 0))

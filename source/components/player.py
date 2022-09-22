@@ -183,6 +183,7 @@ class Player(pygame.sprite.Sprite):
             self.stand(keys,level)
         elif self.state == 'walk':
             self.walk(keys,level)
+            print('lookme')
         elif self.state == 'squat':
             self.squat(keys,level)
         elif self.state == 'jump':

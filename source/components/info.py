@@ -38,7 +38,10 @@ class Info():
         """Creates the info that tracks the number of coins Mario collects"""
         if coin == 0:
             self.coin_labels.append((self.create_lable('X00'), (300, 55)))
-        else:
+        elif coin<10 :
+            self.coin_labels.clear()
+            self.coin_labels.append((self.create_lable('X0{0}'.format(coin)), (300, 55)))
+        else :
             self.coin_labels.clear()
             self.coin_labels.append((self.create_lable('X{0}'.format(coin)), (300, 55)))
     def create_countdown_clock(self):
@@ -64,6 +67,15 @@ class Info():
         """Creates the initial empty score (000000)"""
         if score ==0:
             self.update_labels.append((self.create_lable('000000'), (75, 55)))
+        elif score<1000:
+            self.update_labels.clear()
+            self.update_labels.append((self.create_lable('000{0}'.format(score)), (75, 55)))
+        elif score < 10000:
+            self.update_labels.clear()
+            self.update_labels.append((self.create_lable('00{0}'.format(score)), (75, 55)))
+        elif score < 100000:
+            self.update_labels.clear()
+            self.update_labels.append((self.create_lable('0{0}'.format(score)), (75, 55)))
         else:
             self.update_labels.clear()
             self.update_labels.append((self.create_lable('{0}'.format(score)), (75, 55)))
