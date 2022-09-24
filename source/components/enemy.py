@@ -61,6 +61,9 @@ def create_enemy(enemy_data):
     elif enemy_type ==1: #Koopa 乌龟
         #print('99')
         enemy=Koopa(x,y,direction,"koopa",color)
+    else:
+        # print('99')
+        enemy = Koopa(x, y, direction, "koopa", color)
 
     return enemy
 class Enemy(pygame.sprite.Sprite):

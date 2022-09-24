@@ -38,8 +38,10 @@ class Game():
                     quit()
                 elif event.type == pygame.KEYDOWN: #监听按键是否按下
                     self.keys=pygame.key.get_pressed() #获取所有按键的状态 返回值为bool,通过keys常量作为索引
+
                 elif event.type == pygame.KEYUP:
                     self.keys=pygame.key.get_pressed() #此时返回值为False
+
             self.update()
             # self.screen.fill((random.randint(0,255),random.randint(0,255),random.randint(0,255)))
             # image=get_image(GRAPHICS['mario_bros'],145,32,16,16,(0,0,0),1)

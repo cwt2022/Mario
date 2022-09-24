@@ -11,11 +11,12 @@ def main():
         'load_screen' : load_screen.LoadScreen(),
         'level' : level.Level(),
         'game_over': load_screen.GameDver(),
-
-
-
-        'level2': level2.Level2(),
-        'load_level2': load_screen.Load_level2()
+        'level2': level.Level2(),
+        'load_level2': load_screen.Load_level2(),
+        'level3': level.Level3(),
+        'load_level3': load_screen.Load_level3(),
+        'level4': level.Level4(),
+        'load_level4': load_screen.Load_level4()
 
     }
     '''test'''

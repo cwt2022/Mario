@@ -51,3 +51,23 @@ class Load_level2(LoadScreen):
         self.duration =4000
         self.timer = 0
         self.info =info.Info('load_screen',self.game_info)
+
+class Load_level3(LoadScreen):
+    def start(self,game_info,current_time):
+        game_info['lives']=3
+        self.game_info= game_info
+        self.finished = False
+        self.next='level3'
+        self.duration =4000
+        self.timer = 0
+        self.info =info.Info('load_screen',self.game_info)
+
+class Load_level4(LoadScreen):
+    def start(self,game_info,current_time):
+        game_info['lives']=3
+        self.game_info= game_info
+        self.finished = False
+        self.next='level4'
+        self.duration =4000
+        self.timer = 0
+        self.info =info.Info('load_screen',self.game_info)

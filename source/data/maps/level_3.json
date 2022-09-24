@@ -1,5 +1,10 @@
 {
     "image_name":"level_3",
+    "maps":[
+        {"start_x":   0, "end_x": 8232, "player_x":110, "player_y":  0},
+        {"start_x":8233, "end_x": 9860, "player_x":150, "player_y":451},
+        {"start_x":9862, "end_x":10662, "player_x": 50, "player_y":  0}
+    ],
     "ground":[
         {"x":   0, "y":538, "width": 686, "height": 60},
         {"x": 774, "y":496, "width": 166, "height": 36},
@@ -29,6 +34,17 @@
         {"x":5232, "y":368, "width": 166, "height": 36},
         {"x":5274, "y":406, "width":  84, "height":194},
         {"x":5532, "y":538, "width":1508, "height": 60}
+    ],
+     "pipe":[
+        {"x":4415, "y":410, "width": 82, "height":130, "type":0},
+        {"x":4672, "y":367, "width": 82, "height":170, "type":0},
+        {"x":4929, "y":453, "width": 82, "height": 86, "type":0},
+        {"x":7114, "y":325, "width":104, "height": 86, "type":2},
+        {"x":7632, "y":410, "width": 82, "height":130, "type":1},
+        {"x":7802, "y":410, "width":104, "height":130, "type":1},
+        {"x":7974, "y":410, "width":104, "height":130, "type":1},
+        {"x":8360, "y":453, "width": 82, "height": 86, "type":0},
+        {"x":10500, "y":453, "width":104, "height": 86, "type":2}
     ],
     "step":[
         {"x":5917, "y":366, "width": 80, "height":176},

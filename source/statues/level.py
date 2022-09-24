@@ -180,7 +180,7 @@ class Level:
             self.checkpoint_group.add(stuff.Checkpoint(x,y,w,h,checkpoint_type,enemy_groupid))
 
     def update(self,surface,keys,current_time):
-        #print(self.player.rect.x)
+        print(self.player.rect.x)
         self.current_time = pygame.time.get_ticks()
         self.player.update(keys,self)
         self.info.update(self.game_info)
@@ -211,7 +211,7 @@ class Level:
             self.flag_group.update()
             self.finial_group.update()
 
-            self.is_or_not_finished()
+            self.is_or_not_finished(keys)
 
 
 
@@ -226,8 +226,11 @@ class Level:
         #setup.MUSIC['main_theme'].play()
         self.draw(surface)
 
-    def is_or_not_finished(self):
+    def is_or_not_finished(self,keys):
         #print(self.player.baoqi,self.player.rect.y)
+        if keys[pygame.K_9]:
+            self.finished = True
+            self.next = 'load_level2'
         if self.player.baoqi== True and self.player.rect.y>400:
 
             self.finished=True
@@ -402,7 +405,10 @@ class Level:
         self.player.x_vel=0
     def adjust_player_y(self,sprite):
         # downwards
+        #print('调整ygg')
         if self.player.rect.bottom<sprite.rect.bottom:  #从上往下撞击
+
+            #print(self.player.rect.bottom,sprite.rect.bottom,'第一关')
             self.player.y_vel =0
             self.player.rect.bottom =sprite.rect.top
             self.player.state='walk'
@@ -516,3 +522,92 @@ class Level:
             self.next='game_over'
         else:
             self.next='load_screen'
+
+class Level2(Level):
+    def __init__(self):
+        Level.__init__(self)
+
+    def load_map_data(self):
+        file_name = 'level_2.json'
+        file_path = os.path.join('D:/Users/Administrator/PycharmProjects/superMario/source/data/maps/', file_name)
+        with open(file_path) as f:
+            self.map_data = json.load(f)
+
+    def is_or_not_finished(self,keys):
+        #print(self.player.baoqi,self.player.rect.y)
+        if keys[pygame.K_9]:
+            self.finished = True
+            self.next = 'load_level3'
+
+        if self.player.baoqi== True and self.player.rect.y>400:
+
+            self.finished=True
+            self.next = 'load_level3'
+
+class Level3(Level):
+    def __init__(self):
+        Level.__init__(self)
+
+    def load_map_data(self):
+        file_name = 'level_3.json'
+        file_path = os.path.join('D:/Users/Administrator/PycharmProjects/superMario/source/data/maps/', file_name)
+        with open(file_path) as f:
+            self.map_data = json.load(f)
+
+    def is_or_not_finished(self,keys):
+        # print(self.player.baoqi,self.player.rect.y)
+        if keys[pygame.K_9]:
+            self.finished = True
+            self.next = 'load_level4'
+        if self.player.baoqi == True and self.player.rect.y > 400:
+            self.finished = True
+            self.next = 'load_level4'
+
+class Level4(Level):
+    def __init__(self):
+        Level.__init__(self)
+
+    def load_map_data(self):
+        file_name = 'level_4.json'
+        file_path = os.path.join('D:/Users/Administrator/PycharmProjects/superMario/source/data/maps/', file_name)
+        with open(file_path) as f:
+            self.map_data = json.load(f)
+
+    def setup_flag(self):
+        self.pole_group = pygame.sprite.Group()
+        self.flag_group = pygame.sprite.Group()
+        self.finial_group = pygame.sprite.Group()
+        '''测试用'''
+        for item in [{"x":6470, "y":116, "type":0},
+            {"x":6500, "y": 97, "type":1},
+            {"x":6500, "y":137, "type":1},
+            {"x":6500, "y":177, "type":1},
+            {"x":6500, "y":217, "type":1},
+            {"x":6500, "y":257, "type":1},
+            {"x":6500, "y":297, "type":1},
+            {"x":6500, "y":337, "type":1},
+            {"x":6500, "y":377, "type":1},
+            {"x":6500, "y":417, "type":1},
+            {"x":6500, "y":450, "type":1},
+            {"x":6500, "y": 97, "type":2}]:
+            # for item in self.map_data['flagpole']:
+            x, y, type = item['x'], item['y'], item['type']
+            if type == 0:
+                self.flag_group.add(plagpole.Flag(x, y))
+            elif type == 1:
+                self.pole_group.add(plagpole.Pole(x, y))
+            else:
+                self.finial_group.add(plagpole.Finial(x, y))
+
+    def is_or_not_finished(self,keys):
+        # print(self.player.baoqi,self.player.rect.y)
+        if keys[pygame.K_8]:
+            self.player.hurt_imune =True #伤害免疫
+        if keys[pygame.K_7]:
+            self.player.hurt_imune = False  # 伤害免疫
+        if keys[pygame.K_9]:
+            self.finished = True
+            self.next = 'load_screen'
+        if self.player.baoqi == True and self.player.rect.y > 400:
+            self.finished = True
+            self.next = 'load_screen'

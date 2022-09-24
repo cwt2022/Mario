@@ -331,6 +331,7 @@ class Player(pygame.sprite.Sprite):
        # print(self.y_vel,self.anti_gravity)
         self.y_vel+=self.anti_gravity
         self.can_jump=False
+
         if self.y_vel>=0:  #往上为负方向，往下为正
             self.state='fall'
 
