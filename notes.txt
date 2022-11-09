@@ -164,4 +164,4 @@ source
 
     精灵组：为了方便碰撞检测和统一操作
 
-    mario吃蘑菇变身时只写了x方向检测，注意y方向检车会使mario变成fallz状态
+    mario吃蘑菇变身时只写了x方向检测，注意y方向检车会使mario变成fall状态

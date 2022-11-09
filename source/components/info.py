@@ -95,8 +95,12 @@ class Info():
             self.state_labels.append((self.create_lable('GAME OVER'), (280, 300)))
         # elif self.state == 'time_out':
         #     self.state_labels.append((self.create_lable('TIME OUT'), (290, 310)))
-        elif self.state =='level2':
-            self.state_labels.append((self.create_lable('WELCOME TO LEVEL 2'), (200, 300)))
+        elif self.state == 'load_level2':
+            self.state_labels.append((self.create_lable('WORLD'), (280, 200)))
+            self.state_labels.append((self.create_lable('1 - 1'), (430, 200)))
+            self.state_labels.append((self.create_lable('X   {0}'.format(self.game_info['lives'])), (380, 280)))
+            self.play_image = tools.get_image(setup.GRAPHICS['mario_bros'], 178, 32, 12, 16, (0, 0, 0),
+                                              constants.BG_MULTI)
 
     def create_info_labels(self):  #创建各阶段通用性息
         self.info_labels = []
